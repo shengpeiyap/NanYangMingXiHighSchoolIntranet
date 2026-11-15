@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>南洋鸣溪中学 校园内联网</title>
+<style>
+  body { margin:0; background:#c0c0c0 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4'%3E%3Crect width='2' height='2' fill='%23b8b8b8'/%3E%3C/svg%3E"); font-family:"SimSun","宋体","NSimSun",serif; font-size:14px; color:#000; }
+  #wrap { max-width:780px; margin:16px auto; background:#fff; border:2px outset #ddd; }
+  #banner { background:linear-gradient(#1c3f94,#0a246a); color:#fff; padding:10px 14px; }
+  #banner h1 { margin:0; font-size:20px; letter-spacing:2px; }
+  #banner small { color:#ffcc00; font-size:12px; }
+  marquee { display:block; background:#ffffcc; border-bottom:1px solid #999; padding:3px; color:#c00; }
+  #nav { background:#e8e8e8; padding:6px 10px; border-bottom:1px solid #999; line-height:1.9; }
+  #nav a { color:#00c; margin-right:12px; }
+  #nav .who { color:#333; font-size:12px; display:block; }
+  #main { padding:14px 18px; min-height:320px; line-height:1.7; }
+  #foot { text-align:center; font-size:12px; color:#666; padding:8px; border-top:1px solid #ccc; line-height:1.6; }
+  h3 { color:#0a246a; border-bottom:2px solid #0a246a; padding-bottom:3px; }
+  table { border-collapse:collapse; }
+  td, th { padding:4px 8px; }
+  .post { border:1px solid #aaa; margin:8px 0; padding:6px 10px; background:#f7f7f7; }
+  .post .meta { font-size:12px; color:#555; border-bottom:1px dashed #bbb; margin-bottom:4px; }
+  .small { font-size:12px; color:#888; }
+  .red { color:#c00; }
+  .white { color:#fff; }
+  ::selection { background:#0a246a; color:#fff; }
+  button { font-family:inherit; background:#d4d0c8; border:2px outset #fff; padding:2px 10px; cursor:pointer; }
+  button:active { border-style:inset; }
+  input, textarea { font-family:inherit; border:2px inset #ddd; padding:2px 4px; }
+  .glitch { animation:shake .15s infinite; display:inline-block; }
+  @keyframes shake { 0%{transform:translate(0)} 50%{transform:translate(1px,-1px)} 100%{transform:translate(-1px,1px)} }
+  .q { border:1px solid #999; margin:10px 0; padding:8px 12px; }
+  .q button { display:block; margin:4px 0; text-align:left; width:100%; }
+  .done { color:#060; }
+
+  /* 计算器 */
+  .calc { width:220px; background:#d4d0c8; border:2px outset #fff; padding:8px; display:inline-block; vertical-align:top; margin-right:16px; }
+  .calc .scr { background:#9fbf9f; font-family:monospace; font-size:18px; text-align:right; padding:6px; border:2px inset #ddd; margin-bottom:6px; min-height:24px; overflow:hidden; white-space:nowrap; }
+  .calc .keys { display:grid; grid-template-columns:repeat(4,1fr); gap:4px; }
+  .calc .keys button { padding:6px 0; }
+  .calc.err .scr { background:#300; color:#f33; animation:shake .1s infinite; }
+  .dump { background:#000; color:#0f0; font-family:monospace; font-size:12px; padding:8px; white-space:pre-wrap; word-break:break-all; margin-top:10px; border:2px inset #444; }
+  .dump .cn { color:#ff6; }
+  .tool { border:1px solid #999; padding:8px 12px; margin:12px 0; background:#fafafa; }
+
+  /* 终端 */
+  .term { background:#000; color:#c0c0c0; font-family:"Courier New",monospace; font-size:13px; padding:8px; min-height:220px; max-height:360px; overflow:auto; white-space:pre-wrap; word-break:break-all; border:2px inset #444; }
+  .term .ok { color:#0f0; } .term .bad { color:#f44; } .term .hl { color:#ff6; }
+  .term-in { display:flex; background:#000; color:#0f0; font-family:"Courier New",monospace; padding:4px 8px; border:2px inset #444; border-top:none; }
+  .term-in input { flex:1; background:#000; color:#0f0; border:none; outline:none; font-family:inherit; font-size:13px; }
+  .json { background:#001; color:#8cf; font-family:monospace; font-size:12px; padding:8px; white-space:pre; overflow:auto; border:2px inset #444; margin-bottom:8px; }
+  .json.flash { animation:fl .6s; }
+  @keyframes fl { 0%{background:#330} 100%{background:#001} }
+
+  /* 复古对话框 */
+  .dlg-mask { position:fixed; inset:0; background:rgba(0,0,0,.25); display:flex; align-items:center; justify-content:center; z-index:99; }
+  .dlg { background:#d4d0c8; border:2px outset #fff; width:min(380px,92vw); box-shadow:2px 2px 0 #000; }
+  .dlg-t { background:linear-gradient(90deg,#0a246a,#a6caf0); color:#fff; font-weight:bold; padding:3px 6px; display:flex; justify-content:space-between; }
+  .dlg-t span { background:#d4d0c8; color:#000; padding:0 5px; border:1px outset #fff; cursor:pointer; }
+  .dlg-b { padding:14px; line-height:1.7; }
+  .dlg-f { text-align:center; padding:0 0 10px; }
+
+  /* 记事本档案 */
+  .notepad { border:2px outset #fff; background:#d4d0c8; }
+  .notepad .bar { background:linear-gradient(90deg,#0a246a,#a6caf0); color:#fff; padding:3px 6px; font-weight:bold; }
+  .notepad .menu { font-size:12px; padding:2px 6px; }
+  .notepad pre { background:#fff; margin:0 4px 4px; padding:10px; border:2px inset #ddd; font-family:"Courier New","SimSun",monospace; font-size:13px; white-space:pre-wrap; }
+
+  /* 数据完整性下降 */
+  body.dmg #main { text-shadow:1px 0 rgba(255,0,0,.35), -1px 0 rgba(0,160,255,.35); }
+  body.dmg2 #wrap { filter:contrast(1.15) saturate(.6); }
+  .white, body.dmg .white, .post .white { color:#f7f7f7; text-shadow:none !important; }
+  .pager { text-align:center; margin:12px 0; }
+  .pager a, .pager b { margin:0 6px; }
+  .bin .post { background:#fff0f0; border-color:#c99; }
+  .ticket { border:3px double #000; padding:10px 14px; background:#fffef0; line-height:1.9; }
+  .ticket h4 { margin:0 0 6px; text-align:center; letter-spacing:6px; }
+  .toast { position:fixed; right:14px; bottom:14px; background:#ffffe1; border:1px solid #000; padding:6px 10px; font-size:13px; z-index:98; box-shadow:2px 2px 0 #888; animation:tin .3s; }
+  @keyframes tin { from { transform:translateY(20px); opacity:0; } }
+  .paper { background:#fffef6 repeating-linear-gradient(#fffef6 0 27px, #b8d0f0 27px 28px); border:1px solid #ccc; padding:8px 18px 18px 46px; position:relative; line-height:28px; }
+  .paper:before { content:''; position:absolute; left:34px; top:0; bottom:0; border-left:2px solid #f99; }
+  .paper .hand { font-family:"KaiTi","楷体","STKaiti",cursive; color:#a00; font-size:16px; }
+  .geo { background:#000 ; color:#9f9; padding:12px 16px; font-family:"Comic Sans MS","SimSun",serif; }
+  .geo h2 { color:#ff0; text-align:center; } .geo h4 { color:#0ff; margin:14px 0 4px; }
+  .geo a { color:#f6f; } .geo .gb { border-top:1px dashed #393; padding:4px 0; }
+  .geo marquee { background:#003; color:#ff0; border:none; }
+  .blog { border:1px solid #996; background:#fdfaf0; padding:12px 16px; }
+  .blog h2 { margin:0; color:#663; font-size:20px; } .blog .tag { color:#996; font-size:12px; }
+  .blog .entry { border-top:1px solid #cc9; padding:8px 0; } .blog .entry b { color:#330; }
+  .blog .cmt { background:#f3efdc; padding:6px 10px; margin-top:6px; font-size:13px; }
+  .restored { border:2px dashed #c00; padding:6px; margin-top:6px; color:#c00; }
+
+  /* 坏结局 */
+  #bad { position:fixed; inset:0; background:#000; color:#600; font-family:monospace; overflow:hidden; z-index:100; word-break:break-all; font-size:14px; line-height:1.2; }
+  #bad .msg { position:fixed; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; color:#f22; font-size:20px; text-shadow:0 0 8px #f00; }
+
+  /* 打印机关 */
+  .print-only { display:none; }
+  @media print {
+    body { background:#fff; }
+    #banner, #nav, marquee, #foot, .noprint, .screen-only { display:none !important; }
+    .print-only { display:block !important; }
+    #wrap { border:none; }
+  }
+</style>
+</head>
+<body>
+<!--
+  ================================================================
+  [2004-06-15 陈老师备忘]
+  别再用我办公室分机 213 当临时维护密码了！上周子轩差点用这串数字
+  进后台改他病假期间的考勤。等这周五（6月18日）期末考系统上线，
+  我就把 chen_admin 注销掉，以后只留只读权限。
+  ================================================================
+-->
+<div id="wrap">
+  <div id="banner">
+    <h1>★ 南洋鸣溪中学 校园内联网 ★</h1>
+    <small id="sub"></small>
+  </div>
+  <marquee id="mq" scrollamount="4"></marquee>
+  <div id="nav"></div>
+  <div id="main"></div>
+  <div id="foot"></div>
+</div>
+
+<script>
+/* =========================================================
+   设定（改校名、域名就改这里）
+   ========================================================= */
+const CFG = {
+  school: '南洋鸣溪中学',
+  domain: 'intranet.nymx.edu.my',
+  key: 'NYMX_SESSION'          // localStorage 里的存档名
+};
+const EPOCH = new Date(2004, 5, 18, 8, 0, 0);   // 2004-06-18 08:00 系统上线
+const SEAT = 4959;                               // 你是第 4959 号访客
+const ENC = { ghost: 'R0hPU1RfMDQxMDg=', admin: 'MjEz', cmd: 'T1BFTl9URVJNSU5BTCAtLVVTRVI9MDQxMDggLS1NT0RFPUdIT1NU' };
+
+const DEFAULT = {
+  name: null, seat: SEAT, role: 'student',
+  sync: 0, integrity: 100,
+  exam: [false, false, false], q4: false,
+  dumpSeen: false, binSeen: false, clues: [], blogLogin: false, terminal: false, ghost: false, demoDone: false, badEnd: false,
+  lastSeen: 0, visits: 0
+};
+
+/* ========================= 存档 ========================= */
+let S, lastRaw, mqText = '';
+function readStore() { try { return localStorage.getItem(CFG.key); } catch (e) { return null; } }
+function parse(raw) {
+  let o = {};
+  try { o = JSON.parse(raw || '{}') || {}; } catch (e) { return null; }
+  const s = Object.assign({}, DEFAULT, o);
+  if (!Array.isArray(s.exam)) s.exam = [false, false, false];
+  if (!Array.isArray(s.clues)) s.clues = [];
+  s.sync = Number(s.sync) || 0;
+  s.integrity = Number(s.integrity); if (isNaN(s.integrity)) s.integrity = 100;
+  return s;
+}
+function save() {
+  const raw = JSON.stringify(S);
+  try { localStorage.setItem(CFG.key, raw); } catch (e) {}
+  lastRaw = raw;
+}
+lastRaw = readStore();
+S = parse(lastRaw) || Object.assign({}, DEFAULT);
+
+/* ========================= 工具 ========================= */
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pad = n => String(n).padStart(6, '0');
+const daysSince = () => Math.floor((Date.now() - new Date(2004, 5, 18)) / 864e5);
+const nowStr = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${d.toTimeString().slice(0,5)}`; };
+const b64 = s => { try { return btoa(s); } catch (e) { return ''; } };
+function setMq(t) { mqText = t; $('mq').textContent = t; }
+function addSync(n) { S.sync = Math.min(99, S.sync + n); }
+
+/* 线索：每记下一条，同步率就上升 —— 你知道得越多，它就越认得你 */
+const CLUES = [
+  ['admin',  'chen_admin 已于 2004-06-18 23:42 注销。分机 213 是陈老师的后门密码。'],
+  ['white',  '公告里藏着白字：子轩的学号是 04108。老陈常在计算器上算“学号 × 分机号”。'],
+  ['dump',   '计算器溢出，吐出一段 Base64 编码的调试指令。'],
+  ['term',   '还原指令后打开了系统调试台。这个网页的存档，就在浏览器的 localStorage 里。'],
+  ['q4',     '陈老师倒下时，手里的字条写着：别拔电源。'],
+  ['post3',  '陈老师的残帖只能打印出来看：“只有一个名字它不敢删，你已经见过了。”'],
+  ['bin',    '留言板的页码从 0 开始。回收站里有子轩死前一分钟的留言。'],
+  ['lin',    '子轩的个人主页：他有心脏病，是脑电头环的受试者，陈老师给了他维护员账号。'],
+  ['photo',  '电脑社合照拍于 2004-06-18 22:40。调亮以后，黑板上写着 SAMPLE 0001 / 5000。'],
+  ['counter','首页的访客计数器是子轩写的，读的其实是“采集程序”的样本数。你是第 4959 份。'],
+  ['guess',  '子轩的 GUESS.EXE 有秘密模式：他在采集程序里留了一个不会被删的名字。'],
+  ['chen',   '陈老师的博客：学校与“智源教育科技”合作，公司赞助电脑室，换取学生的脑波数据。'],
+  ['secret', '登录陈老师的博客：《给子轩》——他用自己的脑波当桥，想让系统“相信”它就是子轩。'],
+  ['quota',  '陈老师的草稿：合约要求收集不少于 5000 份样本，未达标前采集程序不得停止。']
+];
+function toast(t) {
+  const d = document.createElement('div'); d.className = 'toast'; d.innerHTML = t;
+  document.body.appendChild(d); setTimeout(() => d.remove(), 3200);
+}
+function clue(id, n = 2) {
+  if (S.clues.includes(id)) return;
+  S.clues.push(id); addSync(n); save();
+  toast(`📝 草稿纸已更新（${S.clues.length}/${CLUES.length}）　<span class="red">同步率 +${n}%</span>`);
+}
+function hurt(n, msg) {
+  S.integrity = Math.max(10, S.integrity - n);
+  if (msg) setMq(msg);
+}
+
+/* 多按钮对话框：btns = [[文字, 回调], ...] */
+function dialog2(title, body, btns) {
+  const d = document.createElement('div');
+  d.className = 'dlg-mask';
+  d.innerHTML = `<div class="dlg"><div class="dlg-t">${title}<span>×</span></div>
+    <div class="dlg-b">${body}</div><div class="dlg-f">${btns.map((b, i) => `<button data-i="${i}">${b[0]}</button>`).join(' ')}</div></div>`;
+  d.querySelectorAll('.dlg-f button').forEach(el => el.onclick = () => { d.remove(); const f = btns[+el.dataset.i][1]; f && f(); });
+  d.querySelector('.dlg-t span').onclick = () => { d.remove(); const f = btns[btns.length - 1][1]; f && f(); };
+  document.body.appendChild(d);
+}
+
+function dialog(title, body, cb, btn = '确定') {
+  const d = document.createElement('div');
+  d.className = 'dlg-mask';
+  d.innerHTML = `<div class="dlg"><div class="dlg-t">${title}<span>×</span></div>
+    <div class="dlg-b">${body}</div><div class="dlg-f"><button>${btn}</button></div></div>`;
+  const close = () => { d.remove(); cb && cb(); };
+  d.querySelector('button').onclick = close;
+  d.querySelector('.dlg-t span').onclick = close;
+  document.body.appendChild(d);
+  d.querySelector('button').focus();
+}
+
+/* ====================== 路由与外框 ====================== */
+function route() {
+  let r = location.hash.replace(/^#\/?/, '').split('?')[0];
+  if (!S.name) return 'login';
+  if (!r || r === 'login') return 'home';
+  return r;
+}
+
+function renderNav() {
+  if (!S.name) { $('nav').innerHTML = '<span class="small">尚未登录。访客请输入姓名进入考场。</span>'; return; }
+  $('nav').innerHTML = `
+    <span class="who">考生：<b>${esc(S.name)}</b>（座号 ${pad(S.seat)}）｜身份：${esc(S.role)}｜记忆同步率：<b class="red">${S.sync}%</b>｜数据完整性：${S.integrity}%</span>
+    <a href="#/home">公告栏</a><a href="#/exam">期末考试</a><a href="#/board">留言板</a><a href="#/tools">工具箱</a>
+    ${S.terminal ? '<a href="#/terminal" style="color:#c00">系统调试台</a>' : ''}
+    <a href="#/notes">草稿纸</a><a href="#/archive">机密档案</a><a href="#" id="logout">登出</a>`;
+  $('logout').onclick = e => { e.preventDefault(); dialog('考场纪律', '⛔ 交卷前严禁离席。'); };
+}
+
+function renderFoot() {
+  const ms = Date.now() - EPOCH;
+  const d = Math.floor(ms / 864e5), h = Math.floor(ms / 36e5) % 24;
+  $('foot').innerHTML = `本站访客人数：<b>${pad(S.name ? S.seat : S.seat - 1)}</b>　｜　服务器运行时间：${d.toLocaleString()} 天 ${h} 小时<br>
+    <!-- counter.asp by 04108 -->© 2004 ${CFG.school} 电脑组 ｜ ${CFG.domain} ｜ 维护：陈老师（分机 213）`;
+}
+
+const R = {};
+function render() {
+  if (S.badEnd) return renderBad();
+  document.body.classList.toggle('dmg', S.integrity < 70);
+  document.body.classList.toggle('dmg2', S.integrity < 40);
+  renderNav(); renderFoot();
+  (R[route()] || R.home)();
+  corrupt();
+}
+window.addEventListener('hashchange', render);
+
+/* 数据完整性低于 70%：文字开始混入异体字 */
+const VAR = { '考':'攷','学':'學','试':'試','生':'甡','的':'旳','你':'祢','我':'莪','是':'昰','有':'冇','人':'亼','在':'扗','了':'孒' };
+function corrupt() {
+  if (S.integrity >= 70) return;
+  const p = S.integrity < 40 ? .35 : .15;
+  const w = document.createTreeWalker($('main'), NodeFilter.SHOW_TEXT);
+  let n; while ((n = w.nextNode())) {
+    if (n.parentNode.closest('input,textarea,.term,.json')) continue;
+    n.nodeValue = n.nodeValue.replace(/./g, c => VAR[c] && Math.random() < p ? VAR[c] : c);
+  }
+}
+
+/* ========================= 登录 ========================= */
+R.login = () => {
+  $('main').innerHTML = `
+    <h3>考生登录</h3>
+    <table>
+      <tr><td>姓　　名：</td><td><input id="nm" maxlength="10"></td></tr>
+      <tr><td>教职员密码：</td><td><input id="pw" type="password" maxlength="12" placeholder="学生免填"></td></tr>
+    </table>
+    <p><button id="lg">登　录</button>　<a href="#" id="fp">忘记密码？</a></p>
+    <p class="small">本系统建议使用 Internet Explorer 6.0，800×600 分辨率浏览。</p>`;
+  $('fp').onclick = e => { e.preventDefault();
+    dialog('帮助', '学生登录无须密码。<br>教职员忘记密码，请联系电脑组陈老师（分机 213）。<br><span class="small">※ 请勿以分机号码作为临时维护密码。</span>'); };
+  const go = () => {
+    const n = $('nm').value.trim();
+    if (!n) return dialog('提示', '请输入姓名。');
+    if (n.length < 2 || /^[\d\s\p{P}\p{S}]+$/u.test(n)) return dialog('提示', '姓名格式不符。请输入真实姓名。');
+    if (/林子轩|子轩/.test(n)) return dialog('提示', '<span class="red">该考生已在考场内。</span><br>请勿冒名顶替。');
+    if (/^陈|chen/i.test(n)) return dialog('提示', '教职员请以教职员密码登录。<br><span class="small">（陈老师今天没有来。）</span>');
+
+    // 准考证：确认或放弃，结果都一样
+    const ticket = () => dialog2('准考证', `
+      <div class="ticket"><h4>准 考 证</h4>
+        姓　　名：<b>${esc(n)}</b><br>
+        座　　号：<b>${pad(S.seat)}</b><br>
+        考　　场：旧实验楼三楼 电脑室<br>
+        考试时间：2004-06-18 08:00 ～ <span class="red">未定</span><br>
+        <span class="small">※ 考生入场后，交卷前严禁离席。</span></div>`,
+      [['确认参加考试', enter], ['放弃考试', giveUp]]);
+    const giveUp = () => dialog2('教务处', '缺考将记入学籍档案，并须参加补考。<br>你确定要放弃吗？',
+      [['确定', () => dialog('教务处', `缺考考生 ${esc(n)} 已列入补考名单。<br><span class="red">补考现在开始。</span>`, enter)], ['返回', ticket]]);
+    const enter = () => {
+      S.name = n; S.visits++; S.role = 'student'; addSync(2); save();
+      if (triedAdmin) clue('admin');
+      setMq(`欢迎【${n}】同学！你已缺考 ${daysSince().toLocaleString()} 天，请立即前往教务处补考。`);
+      location.hash = '#/home'; render();
+    };
+    let triedAdmin = false;
+    if (b64($('pw').value.trim()) === ENC.admin) {
+      triedAdmin = true;
+      dialog('内联网身份验证',
+        '⛔ 账号 <b>chen_admin</b> 已于 2004-06-18 23:42 注销。<br>已注销人员不可登录。<br><br>正在以【学生】身份为你重新分配座位……',
+        ticket);
+    } else ticket();
+  };
+  $('lg').onclick = go;
+  $('nm').onkeydown = $('pw').onkeydown = e => { if (e.key === 'Enter') go(); };
+};
+
+/* ========================= 公告栏 ========================= */
+R.home = () => {
+  $('main').innerHTML = `
+    <h3>📢 教务处公告栏</h3>
+    <div class="post"><div class="meta">${nowStr().slice(0,10)}　｜　发布：系统自动</div>
+      <span class="red">补考通知：考生 ${esc(S.name)}，你已缺考 ${daysSince().toLocaleString()} 天。请尽快完成【期末考试】。</span></div>
+    <div class="post"><div class="meta">2004-06-18 23:59　｜　发布：系统自动</div>
+      请仍在考场内的考生立即停笔。</div>
+    <div class="post"><div class="meta">2004-06-14　｜　发布：教务处</div>
+      <b>《2004 年上学期期末考试考场安排》</b><br>
+      各位同学：本学期期末考试定于 6 月 18 日上午 8:00 准时开始。请各位考生登录内网核对准考证号，严禁在机房内使用自带软盘或修改系统时间。<br>——${CFG.school}教务处
+      <p class="white">他烧到三十九度，还是坚持留在机房，要把最后一套模拟题传上去。昨晚雷雨，旧实验楼跳闸，等我们找到他的时候，已经叫不醒了。医生说，他可能醒不过来了。
+      可是服务器还在运行，学号 04108 还在考场名单里一闪一闪。只要有人替他把卷子考完，他就不算缺考，对吧？
+      ——老陈又坐在机房里，在理综计算器上按那串数字了：子轩的学号，乘以他自己的分机号。</p>
+      <p class="small">（本公告字数较多，部分内容可能无法正常显示。）</p></div>
+    <div class="post"><div class="meta">2004-06-10　｜　发布：总务处</div>
+      本周五旧实验楼进行电力检修，电脑室暂停开放。</div>`;
+};
+
+/* ========================= 期末考试 ========================= */
+const QS = [
+  { q: '【数学】若 log₂x = 5，则 x = ？', o: ['10', '25', '32', '64'], a: 2 },
+  { q: '【物理】12 V 的电源接上 4 Ω 的电阻，通过电阻的电流为？', o: ['0.33 A', '3 A', '16 A', '48 A'], a: 1 },
+  { q: '【华文】“问今是何世，乃不知有汉，无论魏晋。”出自哪一篇？', o: ['《岳阳楼记》', '《醉翁亭记》', '《桃花源记》', '《出师表》'], a: 2 }
+];
+const GARBLE = ['锟斤拷锟斤拷', '烫烫烫烫烫', '屯屯屯屯', '▓▓▒▒░░', '�����', '鎵撳紑'];
+const garble = () => GARBLE[Math.floor(Math.random() * GARBLE.length)];
+
+R.exam = () => {
+  let h = `<h3>📝 2004 年上学期期末考试（高三）</h3>
+    <p>考生：${esc(S.name)}　座号：${pad(S.seat)}　考试开始：2004-06-18 08:00　考试结束：<span class="red glitch">未定</span></p>`;
+  QS.forEach((x, i) => {
+    h += `<div class="q"><b>第 ${i+1} 题</b>　${x.q}`;
+    if (S.exam[i]) h += `<div class="done">✔ 已作答：${x.o[x.a]}</div>`;
+    else h += x.o.map((o, j) => `<button data-q="${i}" data-o="${j}">${'ABCD'[j]}. ${o}</button>`).join('');
+    h += '</div>';
+  });
+  if (S.exam.every(Boolean)) {
+    h += `<div class="q" id="q4" data-hint="chen_admin 的字条：别拔电源">
+      <b>第 4 题</b>（分值：25 分）<br>阅读下列机房事故简报片段，回答问题：<br>
+      “2004 年 6 月 18 日深夜，旧实验楼三楼电闸跳闸。值班保安发现电脑室反锁，室内服务器发出高频蜂鸣。一名陈姓教师倒在主机旁，手中紧握一张写着【□□□□】的字条……”<br>
+      问：字条上写的四个字是什么？`;
+    if (S.q4) h += `<div class="done">✔ 已作答：别拔电源</div>`;
+    else h += `<div style="margin:6px 0">答：<input id="q4in" maxlength="8" size="10"> <button id="q4go">交　卷</button></div>
+      <p class="small red">系统提示：本题为填空题。字条原件已随考场数据封存，考生须自行“回忆”字条内容。答错将扣除数据完整性 10%。<br>
+      ※ 本题的原始数据，可用系统调试工具检视。（调试工具的开启方法，请询问电脑组。）</p>`;
+    h += '</div>';
+    if (S.q4) h += `<div class="q"><b>第 5 题</b>　<span class="red">[数据损坏：CORRUPTED]</span>　请等待下一次考试。</div>`;
+  }
+  $('main').innerHTML = h;
+  $('main').querySelectorAll('button[data-q]').forEach(b => b.onclick = () => answer(+b.dataset.q, +b.dataset.o));
+  if ($('q4go')) {
+    $('q4go').onclick = () => q4submit($('q4in').value);
+    $('q4in').onkeydown = e => { if (e.key === 'Enter') q4submit($('q4in').value); };
+  }
+};
+
+function q4submit(v) {
+  v = v.replace(/[\s\p{P}\p{S}]/gu, '');
+  if (!v) return;
+  if (v === '别拔电源' || v === '別拔電源') {
+    S.q4 = true; save(); clue('q4', 15);
+    setMq('留言板 3 楼的数据开始恢复。');
+    dialog('批改结果', '答案正确。<br><br>你读取了 chen_admin 留在考场里的最后一段记忆。<br><span class="red">同步率 +15%。与这段记忆有关的数据，正在恢复……</span>', render);
+  } else {
+    hurt(10, '你不记得。你根本不在那里。'); save();
+    dialog('批改结果', `<span class="red">答案错误。数据完整性 -10%</span><br>当前完整性：${S.integrity}%`, render);
+  }
+}
+
+function answer(q, o) {
+  if (q < 3) {
+    if (o === QS[q].a) { S.exam[q] = true; addSync(1); save(); render();
+      if (S.exam.every(Boolean)) setMq('第 4 题已开放作答。'); }
+    else dialog('批改结果', '答错了，请重新作答。');
+    return;
+  }
+}
+
+/* ========================= 留言板 ========================= */
+const post = (no, who, when, body, extra = '') =>
+  `<div class="post"${extra}><div class="meta">${no} 楼　｜　${who}　｜　${when}</div>${body}</div>`;
+function yesterday() { const d = new Date(Date.now() - 864e5); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+
+R.board = () => {
+  const m = location.hash.match(/[?&]p=(-?\d+)/);
+  const p = m ? +m[1] : 1;
+  const pager = `<div class="pager noprint">${[1, 2].map(i => i === p ? `<b>[${i}]</b>` : `<a href="#/board?p=${i}">[${i}]</a>`).join('')}　共 2 页</div>`;
+  let h = '';
+
+  if (p === 0) {                       // 隐藏的回收站：改网址 p=0 才进得来
+    if (!S.binSeen) { S.binSeen = true; save(); }
+    clue('bin', 3);
+    setMq('你不该来这里。');
+    $('main').innerHTML = `<div class="bin"><h3>🗑 留言板 — 管理员回收站</h3>
+      <p class="small red">以下帖子已被删除，仅管理员可见。</p>
+      ${post(3, 'chen_admin（已注销）', '2004-06-19 02:14', '<span class="small">[原文仅限打印查看]</span>')}
+      ${post('—', '林子轩', '2004-06-18 23:41', '老师，机房好冷。<br>最后一题我传上去了。<br>灯为什么一直亮着？')}
+      ${post('—', '保安 黄伯', '2004-06-19 01:30', '电脑室门锁着，里面没有人，可是一直有打字的声音。<br>我报告了校长，他叫我不要再上来。')}
+      ${post('—', '小美', '2004-06-20 22:05', '子轩的软盘在我这里。<br>标签上写着：“给小美——考完再看”。<br>我不敢看。他还没考完。')}
+      ${post('—', '系统', '2004-07-01 00:00', '本版已关闭。<br>本版所有帖子已同步至考场服务器。')}
+      </div>${pager}`;
+    return;
+  }
+
+  if (p === 2) {
+    h = `<h3>💬 校园留言板（第 2 页）</h3>
+      ${post(7, '001207 号考生', '2009-04-13 03:12', '我只是想帮我弟弟查成绩，为什么这个网站一直在显示“考试进行中”？我已经登出十几次了。')}
+      ${post(8, '002316 号考生', '2013-08-02 01:48', '我找到规律了。<br>管理员删掉的帖子其实都还在。<b>这个留言板的页码是从 0 开始算的。</b><br>你们自己去看网址。')}
+      ${post(9, '003390 号考生（小美）', '2016-06-18 23:42', '十二年了。今天是你的忌日，我又登进来了。<br>你的名字还在考场名单上。<br>我一直没有看那张软盘。子轩，你到底考完了没有？')}
+      ${post(10, '004102 号考生', '2021-11-03 02:20', '计算器一直显示 ERR 0x0004108。<br>有人知道这是什么吗？为什么偏偏是他的学号？')}
+      ${post(11, `${pad(S.seat - 1)} 号考生`, `${yesterday()} 03:27`, '有人吗？<br>这个网页关不掉。')}
+      ${post(12, `${pad(S.seat)} 号考生`, nowStr(), `<span class="small">（正在输入……）</span>`)}`;
+  } else {
+    h = `<h3>💬 校园留言板</h3>
+      <div class="print-only small">打印时间：${nowStr()}　打印人：${pad(S.seat)} 号考生</div>
+      ${post(1, '小美', '2004-06-16 21:03', '有人知道历史科考哪几课吗？<br>子轩你烧退了没有？不要再熬夜弄电脑了啦。')}
+      ${post(2, '林子轩', '2004-06-17 19:40', '今晚我留在机房，把最后一套模拟题传上去。陈老师说系统星期五一定要上线。<br>我的学号是 04108，大家考完帮我看看成绩有没有进步哈哈。<br>电脑室的空调又坏了，好热。<br><span class="small">──────────<br>电脑社社长 林子轩｜我的个人主页：<a href="#/~lin">${CFG.domain}/~lin</a></span>')}
+      <div class="post">
+        <div class="screen-only"><div class="meta">3 楼　｜　匿名　｜　2004-06-19 02:14</div>
+          <span class="small">[该帖违反本校《电脑室使用规则》第 7 条，已被管理员删除。]</span>
+          ${S.sync >= 20
+            ? `<div class="restored">⚠ 此帖已部分恢复。原文无法在屏幕上显示，仅支持打印查看。<br>你的同步率已经高到能读取陈老师的记忆了。这不是好消息。<br><button onclick="window.print()">🖨 打印本页</button></div>`
+            : `<div class="small red">[数据损坏] 此帖存放在考生记忆同步区，记忆同步率须达 20% 才能读取（当前 ${S.sync}%）。</div>`}</div>
+        <div class="print-only">${S.sync >= 20 ? `<div class="meta">3 楼　｜　chen_admin（已注销）　｜　2004-06-19 02:14</div>
+          子轩不是在考试　是它在考<br>人数不够　它就去外面找<br>我删不掉自己　权限没了<br>别让数字到 100<br>只有一个名字它不敢删　你已经见过了`
+          : '<div class="meta">3 楼</div>[该内容无法打印]'}</div>
+      </div>
+      ${post(4, '阿杰', '2004-06-19 08:05', '今天早上电脑室为什么拉了封条？我的软盘还在里面……<br>还有，子轩的位子上为什么还摆着准考证？')}
+      ${post(5, '小美', '2004-06-25 20:30', '今天去医院了。阿姨说，医生在 6 月 18 日晚上 11 点 42 分……<br><span class="small">[本帖内容过长，已被系统截断]</span>')}
+      ${post(6, '教务处', '2004-07-01 09:00', '本版即日起关闭。请同学们节哀。')}`;
+  }
+  $('main').innerHTML = h + pager + '<p class="noprint"><input size="36" disabled placeholder="发表功能维护中"></p>';
+};
+
+/* ========================= 工具箱 ========================= */
+let calcExpr = '';
+R.tools = () => {
+  $('main').innerHTML = `
+    <h3>🧰 工具箱</h3>
+    <div class="calc" id="calc"><div class="small" style="color:#000">理综考试辅助计算器 v1.2（陈老师编写）</div>
+      <div class="scr" id="scr">${esc(calcExpr) || '0'}</div>
+      <div class="keys">${['7','8','9','÷','4','5','6','×','1','2','3','-','0','C','=','+'].map(k => `<button data-k="${k}">${k}</button>`).join('')}</div>
+    </div>
+    <div style="display:inline-block;vertical-align:top;max-width:440px">
+      <div id="dumpbox"></div>
+    </div>
+    <div class="tool"><b>文件校验工具</b>（还原以 Base64 编码的调试信息）<br>
+      <textarea id="b64in" rows="2" style="width:95%"></textarea><br>
+      <button id="b64go">还　原</button> <span id="b64out" style="font-family:monospace"></span></div>
+    <div class="tool"><b>教务指令栏</b>（仅限教职员）<br>
+      <input id="cmd" style="width:70%"> <button id="cmdgo">执　行</button> <div id="cmdout" class="small"></div></div>`;
+  if (S.dumpSeen) showDump(false);
+  $('calc').querySelectorAll('button').forEach(b => b.onclick = () => calcKey(b.dataset.k));
+  $('b64go').onclick = () => {
+    const v = $('b64in').value.trim();
+    try { $('b64out').textContent = '→ ' + decodeURIComponent(escape(atob(v))); }
+    catch (e) { $('b64out').textContent = '→ 校验失败：不是有效的编码。'; }
+  };
+  const runCmd = () => {
+    const v = $('cmd').value.trim().toUpperCase().replace(/\s+/g, ' ');
+    if (b64(v) === ENC.cmd) {
+      if (!S.terminal) { S.terminal = true; save(); }
+      clue('term', 5);
+      dialog('系统', '<span class="red">调试终端已开启。</span><br>欢迎回来，04108。', () => { location.hash = '#/terminal'; });
+    } else if (v.startsWith('OPEN_TERMINAL')) $('cmdout').textContent = '参数错误：请提供正确的 --user 与 --mode。';
+    else $('cmdout').textContent = '指令无效或权限不足。';
+  };
+  $('cmdgo').onclick = runCmd;
+  $('cmd').onkeydown = e => { if (e.key === 'Enter') runCmd(); };
+};
+
+function calcKey(k) {
+  const scr = $('scr');
+  if (k === 'C') { calcExpr = ''; $('calc').classList.remove('err'); }
+  else if (k === '=') {
+    const e = calcExpr.replace(/×/g, '*').replace(/÷/g, '/');
+    if (/^0?4108\*213$/.test(e) || /^213\*0?4108$/.test(e) || e === '20040618') {
+      calcExpr = ''; $('calc').classList.add('err');
+      scr.textContent = 'ERR 0x0004108';
+      if (!S.dumpSeen) { S.dumpSeen = true; save(); }
+      clue('dump');
+      showDump(true); return;
+    }
+    if (!/^[0-9.+\-*/]+$/.test(e)) { scr.textContent = 'E'; calcExpr = ''; return; }
+    try { const r = Function('"use strict";return (' + e + ')')(); calcExpr = isFinite(r) ? String(+r.toFixed(8)) : ''; scr.textContent = calcExpr || 'E'; }
+    catch (err) { scr.textContent = 'E'; calcExpr = ''; }
+    return;
+  } else calcExpr += k;
+  scr.textContent = calcExpr || '0';
+}
+
+function showDump(fresh) {
+  $('dumpbox').innerHTML = `<div class="dump">[CALC_OVERFLOW_ERR: 0x0004108]
+检测到非标准运算请求……正在读取残留寄存器……
+<span class="cn">陈老师：子轩，老师把你的数据挂载到主循环里了。外面的人都说你已经走了，但只要这台服务器不断电，你就永远还是鸣溪中学的考生。</span>
+
+DEBUG_PAYLOAD: T1BFTl9URVJNSU5BTCAtLXVzZXI9MDQxMDggLS1tb2RlPWdob3N0
+(系统检测到未授权访问，建议立即使用【文件校验工具】还原上述调试指令)</div>`;
+  if (fresh) setMq('计算器发生溢出错误。请勿重复输入非标准算式。');
+}
+
+/* ========================= 调试终端 ========================= */
+let termLog = [];
+function tprint(t, cls) { termLog.push(cls ? `<span class="${cls}">${esc(t)}</span>` : esc(t)); }
+function jsonView() {
+  const o = Object.assign({}, S); delete o.lastSeen;
+  return esc(JSON.stringify(o, null, 2));
+}
+R.terminal = () => {
+  if (!S.terminal) { dialog('ERROR 0x0001', '⛔ 找不到该页面。'); location.hash = '#/tools'; return; }
+  if (!termLog.length) {
+    tprint('NYMX EXAM SERVER  build 2004.06.18  (nymx_exam.exe)', 'hl');
+    tprint('已挂载会话：localStorage["' + CFG.key + '"]   输入 HELP 查看可用指令。');
+  }
+  $('main').innerHTML = `<h3>🖥 系统调试台</h3>
+    <div class="small">会话数据（实时）：</div><div class="json" id="json">${jsonView()}</div>
+    <div class="term" id="term">${termLog.join('\n')}</div>
+    <div class="term-in">nymx:/srv/exam$&nbsp;<input id="tin" autocomplete="off" autocapitalize="off" spellcheck="false"></div>`;
+  const t = $('term'); t.scrollTop = t.scrollHeight;
+  $('tin').onkeydown = e => { if (e.key === 'Enter') { runTerm(e.target.value); } };
+  $('tin').focus();
+};
+
+function roleCheck(v) {
+  if (v === 'student') return { ok: true, msg: '身份已设为 student。' };
+  if (v === 'chen_admin') return { ok: false, msg: '拒绝：账号 chen_admin 已于 2004-06-18 23:42 注销。' };
+  if (b64(v) === ENC.ghost) {
+    if (!S.q4) return { ok: false, msg: '白名单校验失败：记忆同步率不足（请先完成第 4 题）。' };
+    return { ok: true, ghost: true, msg: '……白名单校验通过。欢迎回来，子轩。' };
+  }
+  return { ok: false, msg: '未知身份：' + v };
+}
+
+function runTerm(raw) {
+  const line = raw.trim(); if (!line) return;
+  tprint('nymx:/srv/exam$ ' + line);
+  const [cmd, ...rest] = line.split(/\s+/); const arg = rest.join(' ');
+  switch (cmd.toUpperCase()) {
+    case 'HELP':
+      tprint('HELP            显示本说明\nSTATUS          查看考生状态\nWHOAMI          查看当前身份\nINSPECT <题号>   查看考题的隐藏属性（例：INSPECT q4）\nSET <字段>=<值>  修改会话字段（例：SET role=student）\n                可用身份：student | chen_admin（已注销）| GHOST_xxxxx（底层白名单，系统保留）\nCLEAR           清屏\nEXIT            离开考场');
+      break;
+    case 'STATUS':
+      tprint(`考生 ${S.name} ｜ 座号 ${pad(S.seat)} ｜ 身份 ${S.role} ｜ 同步率 ${S.sync}% ｜ 完整性 ${S.integrity}%`, 'ok'); break;
+    case 'WHOAMI':
+      tprint(S.ghost ? '04108' : `${pad(S.seat)} 号替考考生（${S.name}）`); break;
+    case 'INSPECT':
+      if (arg.toLowerCase() !== 'q4') tprint('找不到该题的隐藏属性。', 'bad');
+      else if (!S.exam.every(Boolean)) tprint('q4 尚未渲染。请先完成第 1~3 题。', 'bad');
+      else tprint('<div id="q4" data-hint="chen_admin 的字条：别拔电源">', 'hl');
+      break;
+    case 'SET': {
+      const m = arg.match(/^(\w+)\s*=\s*(.+)$/);
+      if (!m) { tprint('格式：SET 字段=值', 'bad'); break; }
+      const k = m[1], v = m[2].trim().replace(/^["']|["']$/g, '');
+      if (k === 'role') {
+        const r = roleCheck(v);
+        if (r.ok) { S.role = v; if (r.ghost) S.ghost = true; tprint(r.msg, 'ok'); }
+        else { tprint(r.msg, 'bad'); if (v !== 'chen_admin') hurt(10, '别碰不属于你的东西。'); }
+        save();
+        if (r.ghost) { setTimeout(() => { location.hash = '#/archive'; }, 1200); }
+      } else if (k === 'sync') {
+        const n = Number(v);
+        if (n >= 100) { S.sync = 100; S.badEnd = true; save(); render(); return; }
+        tprint('拒绝：同步率由系统维护，禁止手动修改。', 'bad'); hurt(10, '别碰不属于你的东西。'); save();
+      } else if (k === 'integrity') {
+        tprint('拒绝：数据完整性只能由系统评估。', 'bad'); hurt(10); save();
+      } else tprint('未知字段：' + k, 'bad');
+      break;
+    }
+    case 'CLEAR': termLog = []; break;
+    case 'EXIT': tprint('考场纪律：交卷前严禁离席。', 'bad'); break;
+    default: tprint('未知指令：' + cmd + '　（输入 HELP 查看说明）', 'bad');
+  }
+  render();
+}
+
+/* ========================= 草稿纸 ========================= */
+R.notes = () => {
+  const got = CLUES.filter(c => S.clues.includes(c[0]));
+  let h = `<h3>📝 考生草稿纸</h3>
+    <p class="small">考生 ${esc(S.name)} 的草稿纸。考试中发现的线索会自动记录在这里。　已记录：${got.length} / ${CLUES.length}</p>
+    <div class="paper">`;
+  CLUES.forEach((c, i) => {
+    h += S.clues.includes(c[0]) ? `<div>${i + 1}. ${c[1]}</div>` : `<div style="color:#bbb">${i + 1}. ？？？</div>`;
+  });
+  if (got.length >= 5) h += `<div class="hand">别再往下查了。你知道得越多，它就越认得你。</div>`;
+  if (S.clues.includes('secret')) h += `<div class="hand">谢谢你还记得我。可是小美的那张软盘，到现在还没有人打开过。　——子轩</div>`;
+  h += `</div>`;
+  if (got.length >= 5) h += `<p class="small">（最后几行字迹不是你的。）</p>`;
+  $('main').innerHTML = h;
+};
+
+/* ===================== 子轩的个人主页 /~lin ===================== */
+function hashParam(k) { const m = location.hash.match(new RegExp('[?&]' + k + '=([^&]+)')); return m ? decodeURIComponent(m[1]) : null; }
+
+const SRC = {
+  guess: `/* GUESS.C  猜数字  by 林子轩（04108）  2004-05-02 */
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
+void secret(void);   /* 不给你看 :P */
+
+int main(void)
+{
+    int ans, g, n = 0;
+    srand(time(NULL));
+    ans = rand() % 100 + 1;
+    printf("猜一个 1~100 的数字：");
+
+    while (scanf("%d", &g) == 1) {
+        n++;
+        if (g * 2 == 1236) {        /* 那一天 ×2，嘿嘿 */
+            secret();
+            return 0;
+        }
+        if (g > ans)       printf("太大了！");
+        else if (g < ans)  printf("太小了！");
+        else { printf("猜中了！你用了 %d 次。\\n", n); break; }
+    }
+    return 0;
+}`,
+  counter: `<%
+' COUNTER.ASP  内联网访客计数器
+' 作者：林子轩（04108）  2004-04-11
+
+' 陈老师说，计数器不能自己 +1，
+' 要读“采集程序”的 sample_count。怪怪的。
+Dim n
+n = Application("sample_count")
+Response.Write Right("000000" & n, 6)
+
+' TODO：问老师 sample_count 到 5000 会怎样？
+' TODO：合约是什么合约？为什么采集程序会连到校外？
+%>`
+};
+
+let guessAns = 0, guessN = 0, dosLog = [];
+function dosNew() { guessAns = Math.floor(Math.random() * 100) + 1; guessN = 0; dosLog.push('A:\\> GUESS.EXE', '猜一个 1~100 的数字：'); }
+function dosInput(v) {
+  v = v.trim(); if (!v) return;
+  dosLog.push('> ' + v);
+  const g = parseInt(v, 10);
+  if (isNaN(g)) dosLog.push('请输入数字。');
+  else if (g * 2 === 1236) {
+    dosLog.push('', '==== 子轩的秘密模式 ====',
+      '如果你看到这一段，代表你也被困在这台服务器里了。',
+      '采集程序会一直数下去。我拦不住它，',
+      '只能在名单里留一个它不会删的名字。',
+      '那个名字是：GHOST_ 加上我的学号。',
+      '用它，你就能从考场里“消失”。',
+      '', 'P.S. 小美，如果是你在看：软盘里的东西，考完再看。', '', 'A:\\>');
+    clue('guess', 3); guessAns = -1;
+  } else if (guessAns < 0) { dosLog.push('程序已结束。'); }
+  else {
+    guessN++;
+    if (g > guessAns) dosLog.push('太大了！');
+    else if (g < guessAns) dosLog.push('太小了！');
+    else { dosLog.push(`猜中了！你用了 ${guessN} 次。`, ''); dosNew(); }
+  }
+  render();
+}
+
+R['~lin'] = () => {
+  clue('lin');
+  const run = hashParam('run'), src = hashParam('src');
+  let works = '';
+  if (run === 'guess') {
+    if (!dosLog.length) dosNew();
+    works = `<div class="term" id="dos">${esc(dosLog.join('\n'))}</div>
+      <div class="term-in">A:\\&gt;&nbsp;<input id="dosin" autocomplete="off" inputmode="numeric"></div>
+      <p><a href="#/~lin">← 回主页</a>　<a href="#/~lin?src=guess">查看源代码</a></p>`;
+  } else if (src && SRC[src]) {
+    if (src === 'counter') clue('counter');
+    works = `<pre class="term" style="color:#9f9">${esc(SRC[src])}</pre><p><a href="#/~lin">← 回主页</a></p>`;
+  }
+  $('main').innerHTML = `<div class="geo">
+    <h2>☆★ 欢迎来到子轩的小窝 ★☆</h2>
+    <marquee scrollamount="5">本站最佳浏览：IE 6.0 + 800×600 ｜ 网站施工中 🚧 ｜ 记得签留言簿喔！</marquee>
+    <p style="text-align:center">你是本站第 <b style="color:#ff0">${pad(S.seat)}</b> 位访客</p>
+    ${works ? works : `
+    <h4>【关于我】</h4>
+    林子轩，高三理科，电脑社社长。会 C 语言和一点点 ASP。<br>梦想：去台湾念资工系。<br>最近的烦恼：心脏不太听话。
+
+    <h4>【我的作品】</h4>
+    <div class="gb">🎮 <b>GUESS.EXE</b>　猜数字小游戏，DOS 版。<a href="#/~lin?run=guess">[执行]</a>　<a href="#/~lin?src=guess">[源代码]</a></div>
+    <div class="gb">🔢 <b>COUNTER.ASP</b>　本校内联网首页的访客计数器就是我写的！<a href="#/~lin?src=counter">[源代码]</a></div>
+
+    <h4>【相册】</h4>
+    <canvas id="photo" width="480" height="320" style="max-width:100%;border:4px solid #fff" title="IMG_0618.JPG｜2004-06-18 22:40"></canvas><br>
+    <span class="small" style="color:#9c9">电脑社合照（最后一张）</span><br>
+    <button id="pprop">查看属性</button>　图片增强（亮度）：<input id="pbr" type="range" min="1" max="8" step="0.5" value="1" style="vertical-align:middle">
+
+    <h4>【我的周记】</h4>
+    <div class="gb"><b>2004-03-08</b>　陈老师在做一个“心智评估系统”，模拟考的时候戴脑电头环，记录专注度和答题习惯。全校只有我自愿当受试者。戴上去像外星人，小美笑了我一整节课。</div>
+    <div class="gb"><b>2004-04-20</b>　复诊。医生说心脏的手术不能再拖了，可是我想先考完毕业考。我只跟陈老师说了，他答应帮我保密。</div>
+    <div class="gb"><b>2004-05-27</b>　头环戴了快三个月。陈老师说，服务器里存着我每一次答题的脑波，系统已经能猜到我下一题会选什么了。有点毛。</div>
+    <div class="gb"><b>2004-06-05</b>　陈老师偷偷给了我维护员账号，叫我帮忙把题库传上去。他还以为我不知道他的后门密码是分机号咧。<br>
+      还有，他博客的密码提示问题是“我最重要的一天”，答案是他女儿的生日 0918，全电脑社都知道。我没登进去看，真的。</div>
+    <div class="gb"><b>2004-06-12</b>　我在服务器日志里看到，采集程序每天半夜都会连到校外一个叫 zhiyuan 的地址。问陈老师，他说不要管。<br>我决定自己处理。</div>
+    <div class="gb"><b>2004-06-17</b>　今晚留在机房传最后一套题。外面在打雷。<br>如果毕业考考得好，我就把那张软盘交给小美。</div>
+
+    <h4>【友情链接】</h4>
+    电脑社　｜　<a href="#/~chen">陈老师的博客</a>（老师说不准乱贴，嘘）
+
+    <h4>【留言簿】</h4>
+    <div class="gb">小美｜2004-06-16｜网页好丑哈哈。快点好起来，考完一起去吃 cendol。</div>
+    <div class="gb">阿杰｜2004-06-17｜社长，第三台电脑又自己开机了。</div>
+    <div class="gb">小美｜2004-06-19｜子轩，你回我一下好不好。</div>
+    <div class="gb">004102 号访客｜2021-11-03｜原来他真的存在过。</div>
+    <div class="gb">${pad(S.seat)} 号访客｜${nowStr()}｜<span style="color:#f55">你也来了。</span>　<span class="small">（这条留言不是你写的）</span></div>`}
+  </div>`;
+
+  if ($('dosin')) {
+    const d = $('dos'); d.scrollTop = d.scrollHeight;
+    $('dosin').onkeydown = e => { if (e.key === 'Enter') dosInput(e.target.value); };
+    $('dosin').focus();
+  }
+  if ($('photo')) {
+    drawPhoto($('photo'));
+    $('pprop').onclick = () => dialog('IMG_0618.JPG 属性',
+      `文件名：IMG_0618.JPG<br>拍摄时间：2004-06-18 22:40<br>相机：Canon PowerShot A70<br>拍摄者：陈国伟<br>备注：最后一次社团合照。<span class="red">人数好像多了一个。</span>`);
+    $('pbr').oninput = e => {
+      const v = +e.target.value;
+      $('photo').style.filter = `brightness(${v}) contrast(${1 + v * 0.35})`;
+      if (v >= 5) clue('photo');
+    };
+  }
+};
+
+/* 用程序“拍”出来的电脑社合照：不需要会画画 */
+function drawPhoto(c) {
+  const x = c.getContext('2d'), W = c.width, H = c.height;
+  const g = x.createLinearGradient(0, 0, 0, H); g.addColorStop(0, '#16181f'); g.addColorStop(1, '#0b0c10');
+  x.fillStyle = g; x.fillRect(0, 0, W, H);
+  // 黑板，暗字只有调亮才看得见
+  x.fillStyle = '#121412'; x.fillRect(130, 22, 220, 86);
+  x.fillStyle = '#141614'; x.font = 'bold 22px monospace'; x.textAlign = 'center';
+  x.fillText('SAMPLE 0001', 240, 58); x.fillText('/ 5000', 240, 88);
+  // 一排亮着的屏幕
+  for (let i = 0; i < 6; i++) { x.fillStyle = '#2b3d55'; x.fillRect(20 + i * 78, 250, 56, 38); x.fillStyle = '#5b7fa8'; x.fillRect(24 + i * 78, 254, 48, 30); }
+  // 人形剪影
+  const people = [[70,190],[140,180],[210,186],[280,178],[350,188],[420,182],[105,215],[245,212],[385,214]];
+  people.forEach(([px, py], i) => {
+    const smear = i === 3;   // 糊掉的那一个
+    for (let k = 0; k < (smear ? 7 : 1); k++) {
+      x.globalAlpha = smear ? 0.25 : 1;
+      x.fillStyle = smear ? '#5a2026' : `rgb(${40 + i * 3},${42 + i * 3},${50 + i * 3})`;
+      const ox = smear ? k * 4 - 12 : 0;
+      x.beginPath(); x.arc(px + ox, py - 34, 15, 0, 7); x.fill();
+      x.beginPath(); x.ellipse(px + ox, py + 8, 27, 30, 0, Math.PI, 0); x.fill();
+      x.fillRect(px + ox - 27, py + 8, 54, 30);
+    }
+    x.globalAlpha = 1;
+  });
+  // 噪点
+  const img = x.getImageData(0, 0, W, H), d = img.data;
+  for (let i = 0; i < d.length; i += 4) { const n = (Math.random() - .5) * 8; d[i] += n; d[i+1] += n; d[i+2] += n; }
+  x.putImageData(img, 0, 0);
+  // 数码相机日期戳
+  x.fillStyle = '#ff9a30'; x.font = '15px monospace'; x.textAlign = 'right';
+  x.fillText("'04 06 18  22:40", W - 12, H - 10);
+}
+
+/* ===================== 陈老师的博客 /~chen ===================== */
+R['~chen'] = () => {
+  clue('chen');
+  const mode = hashParam('m');
+  const login = S.blogLogin;
+  let body = '';
+
+  if (mode === 'login' && !login) {
+    body = `<div class="entry"><b>作者登录</b><br>
+      用户名：<input id="bu" size="12" autocapitalize="off"><br>
+      密　码：<input id="bp" type="password" size="12"><br>
+      <button id="bgo">登录</button>　<a href="#" id="bforget">忘记密码？</a>　<span id="bmsg" class="small red"></span></div>`;
+  } else if (login) {
+    body = `<div class="entry"><b>🔒 [私人] 2004-06-18　给子轩</b><br>
+        子轩：<br>医生说你不会醒了。<br>
+        可是服务器里有你四个月的脑波、你每一次答题的习惯、你打字的节奏。系统已经学会像你一样答题了，只差最后一步：让它相信，它就是你。<br>
+        今晚我会把头环接上主机，用我自己的脑波当桥。如果成功，你就能把毕业考考完。<br>
+        如果明天有人在机房发现我，请告诉他们——<b>别拔电源</b>。<br>
+        <span class="small">—— 2004-06-18 22:57</span>　<span class="small red">[本文最后修改时间：${nowStr()}]</span></div>
+      <h4 style="color:#663;margin:14px 0 0">📁 草稿箱（4）</h4>
+      <div class="entry"><b>[草稿] 2003-11-02　要不要回去</b><br>
+        前公司“智源教育科技”的郑总来学校找我。他们想在中学做脑电试点，赞助一整间新电脑室。<br>
+        我当年离职，就是因为他们拿用户数据从来不手软。可是学校的电脑十年没换过了，孩子们连软盘都要排队用。</div>
+      <div class="entry"><b>[草稿] 2004-03-20　合约附件第 7 条</b><br>
+        今天才看懂合约附件：试点须收集“<b>不少于 5000 份有效样本</b>”，未达标前，采集程序不得停止。<br>
+        全校才八百个学生，哪来的五千份？我打电话问郑总，他笑着说：“系统会自己想办法。”</div>
+      <div class="entry"><b>[草稿] 2004-06-12　子轩发现了</b><br>
+        子轩翻了服务器日志，问我为什么采集程序每天半夜都连到校外。我答不出来。<br>
+        他说他会“处理”。我不知道他做了什么。我只知道，我应该在三个月前就拒绝。</div>
+      <div class="entry"><b>[草稿] 2004-06-19 02:10　（无标题）</b><br>
+        <span class="glitch">我在里面。好冷。</span><br>计数器跳了。子轩是第 1 份。<br>它还在数。它要五千份。</div>
+      <p style="text-align:right"><a href="#" id="blogout" class="small">登出</a></p>`;
+  } else {
+    body = `<div class="entry"><b>2004-02-16　「心智评估系统」立项</b><br>
+        学校和智源教育科技签了合作，成为“智慧学校”试点。公司赞助三十台新电脑，条件是在模拟考时用简易脑电头环，记录学生的专注度和答题习惯。校长很高兴，说这是全州第一个。</div>
+      <div class="entry"><b>2004-04-21　保密</b><br>
+        子轩今天告诉我，他有先天性心脏病，医生要他尽快动手术。他求我别告诉别人，他想先考完毕业考。我答应了。我不知道这样做对不对。</div>
+      <div class="entry"><b>2004-06-05　违规</b><br>
+        我违反规定，给了子轩维护员账号。全校只有他看得懂我的代码，题库交给他传，我比较放心。</div>
+      <div class="entry"><span class="small">另有 1 篇私人文章，仅作者登录后可见。</span></div>`;
+  }
+
+  $('main').innerHTML = `<div class="blog">
+    <div style="float:right" class="small">${login ? '已登录：chen' : '<a href="#/~chen?m=login">作者登录</a>'}</div>
+    <h2>陈国伟的博客</h2><div class="tag">一个电脑老师的碎碎念 ｜ ${CFG.domain}/~chen ｜ 本博客架设于旧服务器 OLD-SRV01</div>
+    ${body}
+    <div class="cmt"><b>小美</b>｜2016-06-19<br>陈老师，我昨天去中央医院看您了。您已经躺了十二年。护士说，您的脑波一直在跳，像在打字。</div>
+  </div>`;
+
+  if ($('bgo')) {
+    const go = () => {
+      const u = $('bu').value.trim().toLowerCase(), p = $('bp').value.trim();
+      if (u === 'chen' && p === '0918') { S.blogLogin = true; save(); clue('secret', 3); location.hash = '#/~chen'; }
+      else if (u !== 'chen') $('bmsg').textContent = '用户不存在。';
+      else $('bmsg').textContent = '密码错误。';
+    };
+    $('bgo').onclick = go;
+    $('bp').onkeydown = e => { if (e.key === 'Enter') go(); };
+    $('bforget').onclick = e => { e.preventDefault();
+      dialog('找回密码', '用户名：chen<br>密码提示问题：<b>我最重要的一天？</b>（4 位数字）<br><span class="small">如仍无法登录，请联系系统管理员 chen_admin。</span>'); };
+  }
+  if ($('blogout')) $('blogout').onclick = e => { e.preventDefault(); S.blogLogin = false; save(); render(); };
+  if (login && S.clues.includes('secret')) {
+    // 读到草稿箱，记下合约的线索
+    setTimeout(() => clue('quota', 3), 400);
+  }
+};
+
+/* 在公告栏选中白字时，记下线索 */
+document.addEventListener('selectionchange', () => {
+  if (!S.name || route() !== 'home') return;
+  if (String(getSelection()).includes('04108')) clue('white');
+});
+/* 打印留言板时，记下陈老师的残帖 */
+window.addEventListener('beforeprint', () => {
+  if (S.name && route() === 'board' && S.sync >= 20) clue('post3');
+});
+
+/* ========================= 机密档案 ========================= */
+R.archive = () => {
+  if (!S.ghost) {
+    $('main').innerHTML = '<h3>🔒 机密档案</h3><p class="small">正在验证权限……</p>';
+    dialog('ERROR 0x004F', `⛔ 权限不足。<br>当前身份：【待归档学生】<br>仅允许【机房管理员】或【已注销人员】访问。`, () => { location.hash = '#/home'; });
+    return;
+  }
+  if (!S.demoDone) { S.demoDone = true; save(); }
+  setMq(`欢迎明天继续回来参加考试，${pad(S.seat)} 号同学。`);
+  $('main').innerHTML = `
+    <div class="notepad"><div class="bar">04108.txt - 记事本</div><div class="menu">文件(F)　编辑(E)　格式(O)　帮助(H)</div>
+<pre>========================================
+${CFG.school} - 特殊学籍归档文件（绝密）
+档案编号：04108 ｜ 姓名：林子轩
+临床状态：2004-06-18 23:42 确认脑死亡
+内网状态：活跃（寄生于主进程 nymx_exam.exe）
+========================================
+[系统日志追加 - ${nowStr()} 实时记录]
+当前替考宿主：${pad(S.seat)} 号访客（${esc(S.name)}）
+意识同步进度：${S.sync}%
+备注：宿主已成功访问底层档案。
+由于考场协议已激活，即使关闭本网页，服务器
+仍将在后台持续校准您的脑波频率。
+
+欢迎明天继续回来参加考试，${pad(S.seat)} 号同学。</pre></div>
+    <p style="text-align:center;margin-top:24px"><b>— Demo 阶段一完成 —</b></p>
+    <p class="small" style="text-align:center">（想重新开始，请清除本站的浏览器数据，或 <a href="#" id="reset">点此重置</a>。）</p>`;
+  $('reset').onclick = e => { e.preventDefault(); resetAll(); };
+};
+
+/* ========================= 坏结局 ========================= */
+function renderBad() {
+  document.title = pad(S.seat);
+  let el = $('bad');
+  if (!el) { el = document.createElement('div'); el.id = 'bad'; document.body.appendChild(el); }
+  const junk = '锟斤拷烫烫烫屯屯▓▒░04108考试未结束' ;
+  let s = ''; for (let i = 0; i < 6000; i++) s += junk[Math.floor(Math.random() * junk.length)];
+  el.innerHTML = `${s}<div class="msg">恭喜你，意识上传完成。<br><br>你已成为第 ${pad(S.seat)} 号永久档案。<br><br>
+    <span style="font-size:14px">考生 ${esc(S.name || '')} 的考试，已经结束了。</span><br><br>
+    <button id="reset2">清除记录，重新开始</button></div>`;
+  $('reset2').onclick = resetAll;
+}
+function resetAll() {
+  try { localStorage.removeItem(CFG.key); } catch (e) {}
+  location.hash = ''; location.reload();
+}
+
+/* ======== 让 F12 修改和网页即时联动（每 0.6 秒检查一次存档） ======== */
+setInterval(() => {
+  const raw = readStore();
+  if (raw === lastRaw) return;
+  const prev = S, next = parse(raw);
+  if (!next) {                         // 存档被改坏
+    hurt(10, '数据损坏……别乱碰。'); save(); render(); return;
+  }
+  lastRaw = raw; S = next;
+  if (S.sync >= 100) { S.badEnd = true; save(); render(); return; }
+  if (prev.name && S.sync < prev.sync) { S.sync = prev.sync; hurt(10, '别碰不属于你的东西。'); }
+  if (S.integrity > prev.integrity) { S.integrity = prev.integrity; setMq('数据完整性只能由系统评估。'); }
+  if (S.role !== prev.role) {
+    const r = roleCheck(S.role);
+    if (!r.ok) { S.role = prev.role; setMq(r.msg); }
+    else if (r.ghost) { S.ghost = true; setMq(r.msg); setTimeout(() => { location.hash = '#/archive'; }, 1200); }
+  }
+  if (S.terminal && !prev.terminal) setMq('检测到未授权的调试会话。');
+  save(); render();
+  const j = $('json'); if (j) { j.classList.remove('flash'); void j.offsetWidth; j.classList.add('flash'); }
+}, 600);
+
+/* ========================= 小机关 ========================= */
+document.addEventListener('contextmenu', e => {
+  e.preventDefault();
+  dialog('提示', S.integrity < 70 ? '<span class="red">别碰不属于你的东西。</span>' : '本站禁止右键复制！');
+});
+document.addEventListener('visibilitychange', () => {
+  if (!S.name || S.badEnd) return;
+  document.title = document.hidden ? '考生请勿离开座位' : `${CFG.school} 校园内联网`;
+});
+let peeked = false;
+window.addEventListener('resize', () => {
+  if (peeked || !S.name || !matchMedia('(pointer:fine)').matches) return;
+  if (outerWidth - innerWidth > 200 || outerHeight - innerHeight > 260) {
+    peeked = true; setMq(`警告：检测到 ${pad(S.seat)} 号考生正在窥视后台数据。`);
+  }
+});
+console.log('%c' + CFG.school + ' 校园内联网 v2.3', 'font-size:16px;font-weight:bold;color:#0a246a');
+console.log('%c如果你能看到这里，说明你也懂这些。所有数据都在 localStorage 的 ' + CFG.key + ' 里。小心别改坏了。—— 04108', 'color:#c00');
+
+/* ========================= 启动 ========================= */
+(function init() {
+  $('sub').textContent = `Nan Yang Ming Xi High School Intranet v2.3 ｜ ${CFG.domain}`;
+  const now = Date.now();
+  if (S.name && S.lastSeen && now - S.lastSeen > 30 * 60 * 1000 && !S.badEnd) {
+    const hrs = (now - S.lastSeen) / 36e5;
+    const gain = Math.min(8, 1 + Math.floor(hrs / 3));
+    S.sync = Math.min(95, S.sync + gain);
+    setMq(hrs >= 6 ? `你昨晚也有来考试，${S.name} 同学。（同步率 +${gain}%）`
+                   : `欢迎回来，${S.name}。你离开的时候，考试并没有暂停。（同步率 +${gain}%）`);
+  } else if (S.name) {
+    setMq(S.demoDone ? `欢迎明天继续回来参加考试，${pad(S.seat)} 号同学。`
+                     : `欢迎【${S.name}】同学！你已缺考 ${daysSince().toLocaleString()} 天，请立即前往教务处补考。`);
+  } else setMq(`欢迎使用${CFG.school}校园内联网！2004 年上学期期末考试已开放作答。`);
+  S.lastSeen = now; save();
+  setInterval(() => { if (!S.badEnd) { S.lastSeen = Date.now(); save(); } }, 30000);
+  render();
+})();
+</script>
+</body>
+</html>
