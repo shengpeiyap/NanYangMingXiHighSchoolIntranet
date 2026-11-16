@@ -89,6 +89,19 @@
   .blog h2 { margin:0; color:#663; font-size:20px; } .blog .tag { color:#996; font-size:12px; }
   .blog .entry { border-top:1px solid #cc9; padding:8px 0; } .blog .entry b { color:#330; }
   .blog .cmt { background:#f3efdc; padding:6px 10px; margin-top:6px; font-size:13px; }
+  #nav .off { color:#999; margin-right:12px; font-size:12px; }
+  .pbar { height:12px; border:2px inset #ddd; background:#fff; margin:8px 0; }
+  .pbar i { display:block; height:100%; width:100%; background:repeating-linear-gradient(90deg,#0a246a 0 10px,#fff 10px 12px); animation:pb 1.2s steps(10); }
+  @keyframes pb { from { width:0; } }
+  .qq { border:2px outset #fff; background:#d4d0c8; }
+  .qq-t { background:linear-gradient(90deg,#1c6ac8,#7ab4f0); color:#fff; padding:4px 8px; font-weight:bold; display:flex; justify-content:space-between; }
+  .qq-t .small { color:#e8f0ff; }
+  .qq-log { background:#fff; height:280px; overflow:auto; margin:4px; padding:6px 10px; border:2px inset #ddd; line-height:1.6; }
+  .qq-m { margin:6px 0; } .qq-me { color:#00f; font-weight:bold; } .qq-lin { color:#080; font-weight:bold; }
+  .qq-sys { color:#999; font-size:12px; text-align:center; margin:6px 0; }
+  .qq-typing { padding:0 8px; height:16px; color:#666; }
+  .qq-opts { padding:4px 6px; } .qq-opts button { margin:2px 4px 2px 0; }
+  .qq-in { display:flex; gap:4px; padding:4px 6px 6px; } .qq-in input { flex:1; }
   .restored { border:2px dashed #c00; padding:6px; margin-top:6px; color:#c00; }
 
   /* 坏结局 */
@@ -142,7 +155,7 @@ const DEFAULT = {
   name: null, seat: SEAT, role: 'student',
   sync: 0, integrity: 100,
   exam: [false, false, false], q4: false,
-  dumpSeen: false, binSeen: false, clues: [], blogLogin: false, terminal: false, ghost: false, demoDone: false, badEnd: false,
+  dumpSeen: false, binSeen: false, clues: [], blogLogin: false, q4wrong: 0, opened: [], chatOpen: false, chatLog: [], chatAsked: [], chatCreep: false, boardSeen: false, terminal: false, ghost: false, demoDone: false, badEnd: false,
   lastSeen: 0, visits: 0
 };
 
@@ -154,7 +167,7 @@ function parse(raw) {
   try { o = JSON.parse(raw || '{}') || {}; } catch (e) { return null; }
   const s = Object.assign({}, DEFAULT, o);
   if (!Array.isArray(s.exam)) s.exam = [false, false, false];
-  if (!Array.isArray(s.clues)) s.clues = [];
+  for (const k of ['clues', 'opened', 'chatLog', 'chatAsked']) if (!Array.isArray(s[k])) s[k] = [];
   s.sync = Number(s.sync) || 0;
   s.integrity = Number(s.integrity); if (isNaN(s.integrity)) s.integrity = 100;
   return s;
@@ -200,7 +213,8 @@ const CLUES = [
   ['guess',  '「那个名字是：GHOST_ 加上我的学号。」　—— GUESS.EXE 的秘密模式'],
   ['chen',   '「公司赞助三十台新电脑，条件是……记录学生的专注度和答题习惯。」　—— 陈老师的博客'],
   ['secret', '「今晚我会把头环接上主机，用我自己的脑波当桥。」　—— 陈老师的私人文章《给子轩》'],
-  ['quota',  '「有效样本须对应独立身份；重复测量不得计入验收数量。」　—— 合约附件第 7 条']
+  ['quota',  '「有效样本须对应独立身份；重复测量不得计入验收数量。」　—— 合约附件第 7 条'],
+  ['letter', '「这件事，我只跟子轩一个人说过。系统不可能知道。」　—— 陈老师没寄出的信']
 ];
 function toast(t) {
   const d = document.createElement('div'); d.className = 'toast'; d.innerHTML = t;
@@ -251,8 +265,8 @@ function route() {
 function renderNav() {
   if (!S.name) { $('nav').innerHTML = '<span class="small">尚未登录。访客请输入姓名进入考场。</span>'; return; }
   $('nav').innerHTML = `
-    <span class="who">考生：<b>${esc(S.name)}</b>（座号 ${pad(S.seat)}）｜身份：${esc(S.role)}｜${syncLabel()}：<b class="red">${S.sync}%</b>｜数据完整性：${S.integrity}%</span>
-    <a href="#/home">公告栏</a><a href="#/exam">期末考试</a><a href="#/board">留言板</a><a href="#/tools">工具箱</a>
+    <span class="who">考生：<b>${S.sync >= 45 && Math.random() < .25 ? '林子轩' : esc(S.name)}</b>（座号 ${pad(S.seat)}）｜身份：${esc(S.role)}｜${syncLabel()}：<b class="red">${S.sync}%</b>｜数据完整性：${S.integrity}%</span>
+    <a href="#/home">公告栏</a><a href="#/exam">期末考试</a>${navItem('board', '#/board', '留言板')}${navItem('tools', '#/tools', '工具箱')}${navItem('chat', '#/chat', '聊天室')}
     ${S.terminal ? '<a href="#/terminal" style="color:#c00">系统调试台</a>' : ''}
     <a href="#/notes">草稿纸</a><a href="#/archive">机密档案</a><a href="#" id="logout">登出</a>`;
   $('logout').onclick = e => { e.preventDefault(); dialog('考场纪律', '⛔ 交卷前严禁离席。'); };
@@ -271,8 +285,10 @@ function render() {
   document.body.classList.toggle('dmg', S.integrity < 70);
   document.body.classList.toggle('dmg2', S.integrity < 40);
   renderNav(); renderFoot();
-  (R[route()] || R.home)();
+  const r = route();
+  (OPEN[r] && !OPEN[r]() ? R.closed : (R[r] || R.home))();
   corrupt();
+  if (S.name) checkUnlocks();
 }
 window.addEventListener('hashchange', render);
 
@@ -401,8 +417,9 @@ function q4submit(v) {
     setMq('留言板 3 楼的数据开始恢复。');
     dialog('批改结果', '答案正确。<br><br><span class="red">……你怎么会知道？那天晚上，你并不在场。</span>', render);
   } else {
-    hurt(10, '你不记得。你根本不在那里。'); save();
-    dialog('批改结果', `<span class="red">答案错误。数据完整性 -10%</span><br>当前完整性：${S.integrity}%`, render);
+    hurt(10, '你不记得。你根本不在那里。'); S.q4wrong = (S.q4wrong || 0) + 1; save();
+    dialog('批改结果', `<span class="red">答案错误。数据完整性 -10%</span><br>当前完整性：${S.integrity}%` +
+      (S.q4wrong === 1 ? '<br><br><span class="small">系统提示：公告栏有部分内容无法正常显示。【工具箱】已开放检修。</span>' : ''), render);
   }
 }
 
@@ -421,6 +438,7 @@ const post = (no, who, when, body, extra = '') =>
 function yesterday() { const d = new Date(Date.now() - 864e5); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
 
 R.board = () => {
+  if (!S.boardSeen) { S.boardSeen = true; save(); }
   const m = location.hash.match(/[?&]p=(-?\d+)/);
   const p = m ? +m[1] : 1;
   const pager = `<div class="pager noprint">${[1, 2].map(i => i === p ? `<b>[${i}]</b>` : `<a href="#/board?p=${i}">[${i}]</a>`).join('')}　共 2 页</div>`;
@@ -448,7 +466,7 @@ R.board = () => {
       ${post(9, '003390 号考生（小美）', '2016-06-18 23:42', '十二年了。今天是你的忌日，我又登进来了。<br>你的名字还在考场名单上。<br>我一直没有看那张软盘。子轩，你到底考完了没有？')}
       ${post(10, '004102 号考生', '2021-11-03 02:20', '计算器一直显示 ERR 0x0004108。<br>有人知道这是什么吗？为什么偏偏是他的学号？')}
       ${post(11, `${pad(S.seat - 1)} 号考生`, `${yesterday()} 03:27`, '有人吗？<br>这个网页关不掉。')}
-      ${post(12, `${pad(S.seat)} 号考生`, nowStr(), `<span class="small">（正在输入……）</span>`)}`;
+      ${post(12, `${pad(S.seat)} 号考生`, nowStr(), S.sync >= 35 ? '我还在考试。<br>最后一题还没写完。' : `<span class="small">（正在输入……）</span>`)}`;
   } else {
     h = `<h3>💬 校园留言板</h3>
       <div class="print-only small">打印时间：${nowStr()}　打印人：${pad(S.seat)} 号考生</div>
@@ -819,7 +837,7 @@ R['~chen'] = () => {
         今晚我会把头环接上主机，用我自己的脑波当桥。如果成功，你就能把毕业考考完。<br>
         如果明天有人在机房发现我，请告诉他们——<b>别拔电源</b>。<br>
         <span class="small">—— 2004-06-18 22:57</span>　<span class="small red">[本文最后修改时间：${nowStr()}]</span></div>
-      <h4 style="color:#663;margin:14px 0 0">📁 草稿箱（4）</h4>
+      <h4 style="color:#663;margin:14px 0 0">📁 草稿箱（5）</h4>
       <div class="entry"><b>[草稿] 2003-11-02　要不要回去</b><br>
         前公司“知序教育科技”的郑总来学校找我。他们想在中学做脑电试点，赞助一整间新电脑室。<br>
         我当年离职，就是因为他们拿用户数据从来不手软。可是学校的电脑十年没换过了，孩子们连软盘都要排队用。</div>
@@ -829,6 +847,15 @@ R['~chen'] = () => {
       <div class="entry"><b>[草稿] 2004-06-12　子轩发现了</b><br>
         子轩翻了服务器日志，问我为什么采集程序每天半夜都连到校外。我答不出来。<br>
         他说他会“处理”。我不知道他做了什么。我只知道，我应该在三个月前就拒绝。</div>
+      <div class="entry"><b>[草稿] 2004-06-18 15:20　给林太太（未寄出）</b><br>
+        林太太：<br>
+        对不起。子轩心脏的事，我早就知道。是我答应替他保密，也是我让他一个人留在机房。<br>
+        今天下午测试考卷的作文栏时，我随手打了一句：“子轩，你还在吗？”<br>
+        系统回答：“老师，你女儿的生日礼物买了没有？”<br>
+        这件事，我只跟子轩一个人说过。系统不可能知道。<br>
+        所以，他在里面。<br>
+        我知道知序是什么样的公司。我知道我应该拔掉电源，把一切交出去。可是如果他真的在里面，拔掉电源，就等于是我亲手……<br>
+        这封信，我不会寄出去。</div>
       <div class="entry"><b>[草稿] 2004-06-19 02:10　（无标题）</b><br>
         <span class="glitch">我在里面。好冷。</span><br>计数器跳了。子轩是第 1 份。<br>它还在数。它要五千份。</div>
       <p style="text-align:right"><a href="#" id="blogout" class="small">登出</a></p>`;
@@ -866,7 +893,7 @@ R['~chen'] = () => {
   if ($('blogout')) $('blogout').onclick = e => { e.preventDefault(); S.blogLogin = false; save(); render(); };
   if (login && S.clues.includes('secret')) {
     // 读到草稿箱，记下合约的线索
-    setTimeout(() => clue('quota', 3), 400);
+    setTimeout(() => { clue('quota', 3); clue('letter', 3); }, 400);
   }
 };
 
@@ -894,6 +921,136 @@ document.addEventListener('selectionchange', () => {
 window.addEventListener('beforeprint', () => {
   if (S.name && route() === 'board' && S.sync >= 20) clue('post3');
 });
+
+/* ========================= 聊天室（04108） ========================= */
+const asked = id => S.chatAsked.includes(id);
+const has = id => S.clues.includes(id);
+const TOPICS = [
+  { id: 'who',   label: '你是谁？', cond: () => !asked('who'),
+    lines: () => ['04108。', '林子轩。', '我还在考试。'] },
+  { id: 'num',   label: `我是 ${pad(SEAT)} 号。`, cond: () => !asked('num'),
+    lines: () => ['……又一个。', '对不起。', '不要在这里待太久。它会记住你。'] },
+  { id: 'start', label: '我该从哪里开始？', keep: true, cond: () => !has('white'),
+    lines: () => ['公告。', '老师写的东西，不一定是写给学生看的。', '有些字是白色的。'] },
+  { id: 'calc',  label: '“学号乘以分机号”是什么意思？', keep: true, cond: () => has('white') && !S.dumpSeen,
+    lines: () => ['老师的计算器。', '他每天晚上都坐在机房，按同一串数字。', '在工具箱里。'] },
+  { id: 'b64',   label: '计算器吐出来的乱码是什么？', keep: true, cond: () => S.dumpSeen && !S.terminal,
+    lines: () => ['Base64。', '旁边那个校验工具是我写的。很好用吧。', '还原出来的东西，贴进教务指令栏。'] },
+  { id: 'q4',    label: '第 4 题的答案是什么？', keep: true, cond: () => S.exam.every(Boolean) && !S.q4,
+    lines: () => ['我不知道。', '那天晚上，我已经不在机房了。', '可是老师在。'].concat(
+      S.terminal ? ['你有调试台。题目里藏着的东西，INSPECT 一下。'] : ['去找老师留下的东西。他的工具，或者他的博客。']) },
+  { id: 'chen',  label: '陈老师在哪里？', cond: () => S.q4 && !asked('chen'),
+    lines: () => ['他在里面。', '比我更里面。', '他在留言板写过东西，屏幕上看不到。', '打印出来。屏幕上的字会骗人，纸不会。'] },
+  { id: 'name',  label: '“只有一个名字它不敢删”是什么？', keep: true, cond: () => has('post3') && !S.ghost,
+    lines: () => ['我留的。', '我本来想关掉它。来不及了。', '只来得及留一个名字。', '我的作品，你去看过了吗？'] },
+  { id: 'heart', label: '你的心脏……', cond: () => has('lin') && !asked('heart'),
+    lines: () => ['不要跟小美说。', '……她现在应该知道了吧。', '二十二年了。'] },
+  { id: 'quota', label: '五千份是什么？', cond: () => has('quota') && !asked('quota'),
+    lines: () => ['合约。', '它在数人。', `你是第 ${SEAT} 个。`, '不对，有效的只有', '[连接中断]'] },
+  { id: 'letter',label: '陈老师以为，系统里的人是你。', cond: () => has('letter') && !asked('letter'),
+    lines: () => ['生日礼物。', '那是我问的。', '……应该是我吧。', '有时候，我想不起小美的脸。', '可是我记得 cendol 的味道。这样还算是我吗？'] },
+  { id: 'xm',    label: '小美的软盘里有什么？', cond: () => has('bin') && !asked('xm'),
+    lines: () => ['考完再看。', '我跟她说好的。', '你帮我跟她说', '[04108 已离线]'] }
+];
+const KEYWORDS = [['小美','xm'],['软盘','xm'],['心脏','heart'],['5000','quota'],['五千','quota'],['合约','quota'],
+  ['老师','chen'],['陈','chen'],['答案','q4'],['第4题','q4'],['第四题','q4'],['名字','name'],['白名单','name'],
+  ['乱码','b64'],['base64','b64'],['计算器','calc'],['开始','start'],['提示','start'],['你是谁','who'],['生日','letter']];
+const FILLER = ['……', '我听不清楚。', '考场里不能聊天。', '灯又亮了。', '你再说一次？', '我在写最后一题。'];
+
+let chatBusy = false, chatTimer = null;
+const hhmm = () => new Date().toTimeString().slice(0, 5);
+function chatPush(w, t) { S.chatLog.push([w, t, hhmm()]); if (S.chatLog.length > 120) S.chatLog.shift(); save(); refreshChat(); }
+function linSay(lines, done) {
+  chatBusy = true; refreshChat();
+  let i = 0;
+  const next = () => {
+    if (i >= lines.length) {
+      chatBusy = false;
+      if (S.sync >= 45 && !S.chatCreep) { S.chatCreep = true; save(); setTimeout(() => linSay(['……', '你打字的节奏，跟我好像。']), 1500); }
+      refreshChat(); done && done(); return;
+    }
+    const t = lines[i++];
+    const w = t.startsWith('[') ? 'sys' : 'lin';
+    if ($('qtyping')) $('qtyping').textContent = w === 'lin' ? '04108 正在输入……' : '';
+    setTimeout(() => { chatPush(w, t); next(); }, 500 + Math.min(1600, t.length * 90));
+  };
+  next();
+}
+function chatAsk(id) {
+  const tp = TOPICS.find(x => x.id === id);
+  if (!tp || chatBusy) return;
+  chatPush('me', tp.label);
+  if (!asked(id)) { S.chatAsked.push(id); save(); }
+  linSay(tp.lines());
+}
+function chatFree(text) {
+  text = text.trim(); if (!text || chatBusy) return;
+  chatPush('me', text);
+  const low = text.toLowerCase().replace(/\s/g, '');
+  const hit = KEYWORDS.find(([k, id]) => low.includes(k) && TOPICS.find(x => x.id === id && x.cond()));
+  if (hit) { if (!asked(hit[1])) { S.chatAsked.push(hit[1]); save(); } linSay(TOPICS.find(x => x.id === hit[1]).lines()); }
+  else linSay([FILLER[Math.floor(Math.random() * FILLER.length)]]);
+}
+function chatHtml() {
+  return S.chatLog.map(([w, t, tm]) => w === 'sys'
+    ? `<div class="qq-sys">${esc(t)}</div>`
+    : `<div class="qq-m"><span class="${w === 'me' ? 'qq-me' : 'qq-lin'}">${w === 'me' ? esc(S.name) : '04108'}</span> <span class="small">${tm}</span><br>${esc(t)}</div>`).join('');
+}
+function refreshChat() {
+  const log = $('qlog'); if (!log) return;
+  log.innerHTML = chatHtml(); log.scrollTop = log.scrollHeight;
+  if (!chatBusy && $('qtyping')) $('qtyping').textContent = '';
+  const opts = TOPICS.filter(x => x.cond());
+  $('qopts').innerHTML = chatBusy ? '<span class="small">……</span>'
+    : (opts.length ? opts.map(x => `<button data-t="${x.id}">${esc(x.label)}</button>`).join('') : '<span class="small">（暂时没有想问的。）</span>');
+  $('qopts').querySelectorAll('button').forEach(b => b.onclick = () => chatAsk(b.dataset.t));
+}
+R.chat = () => {
+  $('main').innerHTML = `<h3>💬 校园聊天室 <span class="small">v1.0（电脑社开发）</span></h3>
+    <div class="qq"><div class="qq-t">与 04108 聊天中<span class="small">在线人数：2</span></div>
+      <div class="qq-log" id="qlog"></div>
+      <div class="qq-typing small" id="qtyping"></div>
+      <div class="qq-opts" id="qopts"></div>
+      <div class="qq-in"><input id="qin" placeholder="输入消息……" autocomplete="off"><button id="qsend">发送</button></div></div>`;
+  const send = () => { const v = $('qin').value; $('qin').value = ''; chatFree(v); };
+  $('qsend').onclick = send;
+  $('qin').onkeydown = e => { if (e.key === 'Enter') send(); };
+  refreshChat();
+  if (!S.chatLog.length && !chatBusy) linSay(['有人吗', '……你看得到这些字吗', '你是第几号？']);
+};
+
+/* ===================== 网站逐步恢复 ===================== */
+const OPEN = {
+  board: () => S.exam.every(Boolean),
+  tools: () => has('white') || S.q4wrong >= 1 || S.dumpSeen,
+  chat:  () => S.chatOpen
+};
+const OPEN_NAME = { board: '留言板', tools: '工具箱' };
+function navItem(key, href, label) {
+  return OPEN[key]() ? `<a href="${href}">${label}</a>` : `<span class="off">${label}（维护中）</span>`;
+}
+function checkUnlocks() {
+  for (const k of ['board', 'tools']) {
+    if (document.querySelector('.dlg-mask')) break;   // 一次只弹一个对话框
+    if (OPEN[k]() && !S.opened.includes(k)) {
+      S.opened.push(k); save();
+      setTimeout(() => dialog('系统恢复', `正在恢复数据……<div class="pbar"><i></i></div>【${OPEN_NAME[k]}】已恢复上线。`), 300);
+      break;
+    }
+  }
+  // 留言板开放、玩家第一次去看过之后，04108 会主动传讯息
+  if (S.boardSeen && !S.chatOpen && !chatTimer) {
+    chatTimer = setTimeout(() => {
+      S.chatOpen = true; save(); renderNav();
+      toast('🔔 叮咚！04108 给你发来一条消息。');
+      setMq('聊天室：04108 正在等你。');
+    }, 8000);
+  }
+}
+R.closed = () => {
+  $('main').innerHTML = `<h3>🚧 系统维护中</h3><p>此版块的数据正在恢复，请稍后再试。</p>
+    <p class="small">恢复进度：<span class="glitch">██░░░░░░░░</span></p>`;
+};
 
 /* ========================= 机密档案 ========================= */
 R.archive = () => {
