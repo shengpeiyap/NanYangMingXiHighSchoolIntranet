@@ -49,7 +49,7 @@
   .term .ok { color:#0f0; } .term .bad { color:#f44; } .term .hl { color:#ff6; }
   .term-in { display:flex; background:#000; color:#0f0; font-family:"Courier New",monospace; padding:4px 8px; border:2px inset #444; border-top:none; }
   .term-in input { flex:1; background:#000; color:#0f0; border:none; outline:none; font-family:inherit; font-size:13px; }
-  .json { background:#001; color:#8cf; font-family:monospace; font-size:12px; padding:8px; white-space:pre; overflow:auto; border:2px inset #444; margin-bottom:8px; }
+  .json { background:#001; color:#8cf; font-family:monospace; font-size:12px; padding:8px; white-space:pre; overflow:auto; max-height:190px; border:2px inset #444; margin-bottom:8px; }
   .json.flash { animation:fl .6s; }
   @keyframes fl { 0%{background:#330} 100%{background:#001} }
 
@@ -69,7 +69,16 @@
 
   /* 数据完整性下降 */
   body.dmg #main { text-shadow:1px 0 rgba(255,0,0,.35), -1px 0 rgba(0,160,255,.35); }
-  body.dmg2 #wrap { filter:contrast(1.15) saturate(.6); }
+  body.dmg2 { background:#3a0000; }
+  body.dmg2 #wrap { filter:contrast(1.25) saturate(.35) sepia(.45) hue-rotate(-25deg); box-shadow:0 0 30px #a00; }
+  body.dmg3 { background:#600; animation:redpulse 2.4s infinite; }
+  body.dmg3 #wrap { filter:invert(1) hue-rotate(180deg) contrast(1.3); }
+  body.dmg3 marquee { direction:rtl; }
+  @keyframes redpulse { 50% { background:#200; } }
+  body.flick { filter:invert(1) !important; }
+  #invalid { position:fixed; inset:0; background:#000; color:#ccc; z-index:100; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; font-family:"Courier New","SimSun",monospace; line-height:1.9; padding:20px; }
+  #invalid .seq div { opacity:0; animation:fadein .8s forwards; }
+  @keyframes fadein { to { opacity:1; } }
   .white, body.dmg .white, .post .white { color:#f7f7f7; text-shadow:none !important; }
   .pager { text-align:center; margin:12px 0; }
   .pager a, .pager b { margin:0 6px; }
@@ -105,6 +114,20 @@
   #boot { position:fixed; inset:0; background:#000; color:#aaa; font-family:"Courier New",monospace; white-space:pre-wrap; padding:30px; z-index:120; font-size:14px; line-height:1.6; }
   fieldset.adm { border:2px groove #ddd; margin:10px 0; padding:6px 12px; background:#f4f4f4; }
   fieldset.adm legend { font-weight:bold; color:#0a246a; }
+  #intro { position:fixed; inset:0; background:#eef1f5; z-index:110; overflow:auto; font-family:-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif; color:#1f2328; }
+  #intro .wrap { max-width:640px; margin:28px auto; padding:0 14px; }
+  #intro .crumb { font-size:13px; color:#6b7280; margin-bottom:10px; }
+  #intro .card { background:#fff; border-radius:12px; box-shadow:0 1px 3px rgba(0,0,0,.08); padding:18px 20px; margin-bottom:12px; }
+  #intro .who { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+  #intro .av { width:38px; height:38px; border-radius:50%; background:#f4b8c4; color:#fff; display:flex; align-items:center; justify-content:center; font-weight:bold; }
+  #intro .av.g { background:#9aa5b1; }
+  #intro .nm { font-weight:600; } #intro .tm { font-size:12px; color:#6b7280; }
+  #intro h2 { font-size:19px; margin:4px 0 12px; }
+  #intro p { line-height:1.85; margin:0 0 10px; font-size:15px; }
+  #intro .go { display:block; width:100%; padding:12px; margin-top:6px; border:none; border-radius:8px; background:#2563eb; color:#fff; font-size:15px; cursor:pointer; font-family:inherit; }
+  #intro .rep p { font-size:14px; margin:0; }
+  #intro .note { font-size:12px; color:#9aa5b1; text-align:center; margin:16px 0 30px; }
+  .goal { border:1px dashed #a66; background:#fff6f0; padding:6px 10px; margin:0 0 10px; font-size:13px; }
   .restored { border:2px dashed #c00; padding:6px; margin-top:6px; color:#c00; }
 
   /* 坏结局 */
@@ -158,7 +181,7 @@ const DEFAULT = {
   name: null, seat: SEAT, role: 'student',
   sync: 0, integrity: 100,
   exam: [false, false, false], q4: false,
-  dumpSeen: false, binSeen: false, clues: [], blogLogin: false, q4wrong: 0, opened: [], chatOpen: false, chatLog: [], chatAsked: [], chatCreep: false, chatCount: {}, fakeDate: 0, fakeSetAt: 0, exitTries: 0, exitLin: false, adminSeen: false, realClock: false, boardSeen: false, terminal: false, ghost: false, demoDone: false, badEnd: false,
+  dumpSeen: false, binSeen: false, clues: [], blogLogin: false, q4wrong: 0, opened: [], chatOpen: false, chatLog: [], chatAsked: [], chatCreep: false, chatCount: {}, invalidEnd: false, repaired: 0, introSeen: false, fakeDate: 0, fakeSetAt: 0, exitTries: 0, exitLin: false, adminSeen: false, realClock: false, boardSeen: false, terminal: false, ghost: false, demoDone: false, badEnd: false,
   lastSeen: 0, visits: 0
 };
 
@@ -208,7 +231,7 @@ function addSync(n) {
 
 /* 线索：每记下一条，同步率就上升 —— 你知道得越多，它就越认得你 */
 const CLUES = [
-  ['admin',  '「账号 chen_admin 已于 2004-06-18 23:42 注销。」　—— 登录页（我输入的密码是 213）'],
+  ['admin',  '「账号 chen_admin 已于 2004-06-18 23:42 注销。」　—— 我用密码 213 登录时，系统这样回答'],
   ['white',  '「学号 04108 还在考场名单里一闪一闪……子轩的学号，乘以他自己的分机号。」　—— 公告栏，看不见的那一段'],
   ['dump',   '「DEBUG_PAYLOAD: T1BFTl9URVJNSU5BTCAtLXVz……」　—— 计算器溢出时的画面'],
   ['term',   '「已挂载会话：localStorage[\"NYMX_SESSION\"]」　—— 系统调试台'],
@@ -239,7 +262,8 @@ function clue(id, n = 2) {
   toast(`📝 草稿纸已更新（${S.clues.length}/${CLUES.length}）　<span class="red">${syncLabel()} +${n}%</span>`);
 }
 function hurt(n, msg) {
-  S.integrity = Math.max(10, S.integrity - n);
+  S.integrity = Math.max(0, S.integrity - n);
+  if (S.integrity <= 0) setTimeout(collapse, 300);
   if (msg) setMq(msg);
 }
 
@@ -299,8 +323,10 @@ function renderFoot() {
 const R = {};
 function render() {
   if (S.badEnd) return renderBad();
+  if (S.invalidEnd) return renderInvalid();
   document.body.classList.toggle('dmg', S.integrity < 70);
-  document.body.classList.toggle('dmg2', S.integrity < 40);
+  document.body.classList.toggle('dmg2', S.integrity < 40 && S.integrity >= 20);
+  document.body.classList.toggle('dmg3', S.integrity < 20);
   renderNav(); renderFoot();
   const r = route();
   (OPEN[r] && !OPEN[r]() ? R.closed : (R[r] || R.home))();
@@ -313,7 +339,7 @@ window.addEventListener('hashchange', render);
 const VAR = { '考':'攷','学':'學','试':'試','生':'甡','的':'旳','你':'祢','我':'莪','是':'昰','有':'冇','人':'亼','在':'扗','了':'孒' };
 function corrupt() {
   if (S.integrity >= 70) return;
-  const p = S.integrity < 40 ? .35 : .15;
+  const p = S.integrity < 20 ? .55 : S.integrity < 40 ? .35 : .15;
   const w = document.createTreeWalker($('main'), NodeFilter.SHOW_TEXT);
   let n; while ((n = w.nextNode())) {
     if (n.parentNode.closest('input,textarea,.term,.json')) continue;
@@ -322,15 +348,45 @@ function corrupt() {
 }
 
 /* ========================= 登录 ========================= */
+function showIntro() {
+  if ($('intro')) return;
+  const d = document.createElement('div'); d.id = 'intro';
+  d.innerHTML = `<div class="wrap">
+    <div class="crumb">独中校友互助区 › 求助</div>
+    <div class="card">
+      <div class="who"><div class="av">美</div><div><div class="nm">小美（2004 届）</div><div class="tm">2026-10-28 23:42</div></div></div>
+      <h2>【求助】有人能帮我进一个旧学校内网看看吗？</h2>
+      <p>我是${CFG.school} 2004 年的毕业生，以前大家都叫我小美。</p>
+      <p>二十二年前，我的同学林子轩在学校机房出了事。那天是期末考的前一晚。</p>
+      <p>学校的旧内联网早就应该关掉了。可是上个月，我发现它还开着。网址没变，访客计数器还在跳。他的学号 04108，还在考场名单上。</p>
+      <p>我进去过一次，是 2016 年，他走后的第十二年。那次之后，我就不敢再进去了。我说不上为什么，只记得那天晚上，我关不掉那个网页。</p>
+      <p>我手上还有一张他留给我的软盘，标签上写着：<b>给小美——考完再看</b>。二十二年了，我一直没有打开。</p>
+      <p>所以我想拜托一个陌生人，帮我进去看看：<b>他到底考完了没有。</b></p>
+      <p>登录的时候，随便填一个名字就可以。拜托了。</p>
+      <p>还有——如果网页叫你做什么，别全信。</p>
+      <button class="go" id="introgo">打开链接：${CFG.domain}</button>
+    </div>
+    <div class="card rep"><div class="who"><div class="av g">K</div><div><div class="nm">Kelvin_T</div><div class="tm">昨天 03:31</div></div></div>
+      <p>我进去了。它说我是 004958 号。现在网页关不掉，有人知道怎么办吗？</p></div>
+    <div class="card rep"><div class="who"><div class="av">美</div><div><div class="nm">小美（2004 届）</div><div class="tm">昨天 09:12</div></div></div>
+      <p>@Kelvin_T 你还在吗？</p></div>
+    <div class="note">本作品为虚构故事，校名、人物、公司与事件均为虚构。</div>
+  </div>`;
+  document.body.appendChild(d);
+  $('introgo').onclick = () => { S.introSeen = true; save(); d.remove(); };
+}
+
 R.login = () => {
+  if (!S.introSeen) showIntro();
   $('main').innerHTML = `
     <h3>考生登录</h3>
     <table>
       <tr><td>姓　　名：</td><td><input id="nm" maxlength="10"></td></tr>
       <tr><td>教职员密码：</td><td><input id="pw" type="password" maxlength="12" placeholder="学生免填"></td></tr>
     </table>
-    <p><button id="lg">登　录</button>　<a href="#" id="fp">忘记密码？</a></p>
+    <p><button id="lg">登　录</button>　<a href="#" id="fp">忘记密码？</a>　<a href="#" id="reintro" class="small">（重读小美的帖子）</a></p>
     <p class="small">本系统建议使用 Internet Explorer 6.0，800×600 分辨率浏览。</p>`;
+  $('reintro').onclick = e => { e.preventDefault(); showIntro(); };
   $('fp').onclick = e => { e.preventDefault();
     dialog('帮助', '学生登录无须密码。<br>教职员忘记密码，请联系电脑组陈老师（分机 213）。<br><span class="small">※ 请勿以分机号码作为临时维护密码。</span>'); };
   const go = () => {
@@ -576,8 +632,13 @@ DEBUG_PAYLOAD: T1BFTl9URVJNSU5BTCAtLXVzZXI9MDQxMDggLS1tb2RlPWdob3N0
 /* ========================= 调试终端 ========================= */
 let termLog = [];
 function tprint(t, cls) { termLog.push(cls ? `<span class="${cls}">${esc(t)}</span>` : esc(t)); }
+let jsonFull = false;
 function jsonView() {
   const o = Object.assign({}, S); delete o.lastSeen;
+  if (!jsonFull) {
+    for (const k of ['chatLog', 'chatAsked', 'chatCount', 'opened', 'exitLin', 'chatCreep', 'realClock', 'boardSeen', 'binSeen', 'dumpSeen', 'adminSeen', 'q4wrong', 'visits', 'fakeSetAt']) delete o[k];
+    o.clues = `${S.clues.length} 条（略）`;
+  }
   return esc(JSON.stringify(o, null, 2));
 }
 R.terminal = () => {
@@ -587,10 +648,11 @@ R.terminal = () => {
     tprint('已挂载会话：localStorage["' + CFG.key + '"]   输入 HELP 查看可用指令。');
   }
   $('main').innerHTML = `<h3>🖥 系统调试台</h3>
-    <div class="small">会话数据（实时）：</div><div class="json" id="json">${jsonView()}</div>
+    <div class="small">会话数据（实时）：<a href="#" id="jtoggle">${jsonFull ? '［精简显示］' : '［展开全部］'}</a></div><div class="json" id="json">${jsonView()}</div>
     <div class="term" id="term">${termLog.join('\n')}</div>
     <div class="term-in">${suPending ? '密码：' : 'nymx:/srv/exam$'}&nbsp;<input id="tin" type="${suPending ? 'password' : 'text'}" autocomplete="off" autocapitalize="off" spellcheck="false"></div>`;
   const t = $('term'); t.scrollTop = t.scrollHeight;
+  $('jtoggle').onclick = e => { e.preventDefault(); jsonFull = !jsonFull; render(); };
   $('tin').onkeydown = e => { if (e.key === 'Enter') { runTerm(e.target.value); } };
   $('tin').focus();
 };
@@ -612,7 +674,7 @@ function runTerm(raw) {
     suPending = false;
     tprint('密码：' + '*'.repeat(Math.min(raw.length, 8)));
     if (b64(raw.trim()) !== ENC.admin) tprint('su: 密码错误。', 'bad');
-    else if (!beforeDereg()) tprint(`su: 账号 chen_admin 已于 2004-06-18 23:42 注销。（当前系统时间：${fmtT(sysNow())}）`, 'bad');
+    else if ((clue('admin'), !beforeDereg())) tprint(`su: 账号 chen_admin 已于 2004-06-18 23:42 注销。（当前系统时间：${fmtT(sysNow())}）`, 'bad');
     else { S.role = 'chen_admin'; save(); tprint('欢迎回来，陈老师。（【管理后台】已开放）', 'ok'); }
     render(); return;
   }
@@ -684,11 +746,13 @@ function runTerm(raw) {
 R.notes = () => {
   const got = CLUES.filter(c => S.clues.includes(c[0]));
   let h = `<h3>📝 考生草稿纸</h3>
+    <div class="goal">📌 小美的请求：帮我看看，他到底考完了没有。　<a href="#" id="reintro2">重读帖子</a></div>
     <p class="small">考生 ${esc(S.name)} 的草稿纸。考试中发现的线索会自动记录在这里。　已记录：${got.length} / ${CLUES.length}</p>
     <div class="paper">`;
   CLUES.forEach((c, i) => {
     h += S.clues.includes(c[0]) ? `<div>${i + 1}. ${c[1]}</div>` : `<div style="color:#bbb">${i + 1}. ？？？</div>`;
   });
+  setTimeout(() => { const r = $('reintro2'); if (r) r.onclick = e => { e.preventDefault(); showIntro(); }; }, 0);
   if (got.length >= 5) h += `<div class="hand">别再往下查了。你知道得越多，它就越认得你。</div>`;
   if (S.clues.includes('secret')) h += `<div class="hand">谢谢你还记得我。可是小美的那张软盘，到现在还没有人打开过。　——子轩</div>`;
   h += `</div>`;
@@ -1038,12 +1102,16 @@ const TOPICS = [
     lines: () => ['……模型。', '所以那天下午回答老师的，不是我。', '……', '那现在跟你说话的，是谁？'] },
   { id: 'upload',label: '你相册里那张照片，是谁上传的？', cond: () => has('upload') && !asked('upload'),
     lines: () => ['不是我。', '那时候我在医院。', '它用我的账号。', '它一直在用我的账号。'] },
+  { id: 'broken',label: '我的画面开始坏掉了。', cond: () => S.integrity < 40 && !asked('broken'),
+    lines: () => ['我知道。', '你的字，开始跟我一样了。', '坏掉的东西，它就认不出来。', '……可是坏掉的东西，也回不去了。'] },
+  { id: 'fixed', label: '系统用你的模型修复了我。', cond: () => S.repaired > 0 && !asked('fixed'),
+    lines: () => ['……我知道。', '我感觉得到。', '你现在有一部分，是我。', '对不起。'] },
   { id: 'xm',    label: '小美的软盘里有什么？', cond: () => has('bin') && !asked('xm'),
     lines: () => ['考完再看。', '我跟她说好的。', '你帮我跟她说', '[04108 已离线]'] }
 ];
 const KEYWORDS = [['账号','time'],['登录','time'],['登入','time'],['时间','time'],['模型','model'],['照片','upload'],['相册','upload'],['上传','upload'],['小美','xm'],['软盘','xm'],['心脏','heart'],['5000','quota'],['五千','quota'],['合约','quota'],
   ['老师','chen'],['陈','chen'],['答案','q4'],['第4题','q4'],['第四题','q4'],['名字','name'],['白名单','name'],
-  ['乱码','b64'],['base64','b64'],['计算器','calc'],['开始','start'],['提示','start'],['你是谁','who'],['生日','letter'],['zhixu','zhixu'],['知序','zhixu'],['出去','exit'],['离开','exit']];
+  ['乱码','b64'],['base64','b64'],['计算器','calc'],['开始','start'],['提示','start'],['你是谁','who'],['生日','letter'],['zhixu','zhixu'],['知序','zhixu'],['出去','exit'],['离开','exit'],['坏','broken'],['修复','fixed']];
 const FILLER = ['……', '我听不清楚。', '考场里不能聊天。', '灯又亮了。', '你再说一次？', '我在写最后一题。'];
 
 let chatBusy = false, chatTimer = null;
@@ -1270,6 +1338,7 @@ ${CFG.school} - 特殊学籍归档文件（绝密）
 状态：<span class="cn">等待交付</span>${ev ? `
 
 ……检测到该考生持有远端连线记录（郑总邮件 ×3、计划任务 ×1）。
+依据《争议样本处理程序》（2001 年修订）：涉及授权争议的样本，须隔离并等待人工复核。
 状态更新：<span class="cn">交付已暂停，等待人工审核。</span>` : ''}</div>
       ${ev ? '<p style="text-align:center;margin-top:14px">你带走了证据。它第一次停了下来。</p>'
            : '<p class="small" style="text-align:center;margin-top:14px">（也许，还有什么东西是你可以带走的。）</p>'}
@@ -1278,6 +1347,63 @@ ${CFG.school} - 特殊学籍归档文件（绝密）
   }, 3500);
   $('reset').onclick = e => { e.preventDefault(); resetAll(); };
 };
+
+/* ===================== 数据完整性归零：修复，还是被丢弃？ ===================== */
+let collapsing = false;
+function collapse() {
+  if (collapsing || S.invalidEnd || S.badEnd || !S.name || S.integrity > 0) return;
+  collapsing = true;
+  dialog2('⚠ 系统警告', `数据完整性：<b class="red">0%</b><br>样本 ${pad(S.seat)} 已无法识别。<br><br>是否执行自动修复？<br>
+    <span class="small">修复将以系统内的参考模型，补全缺失的数据。</span>`,
+    [['执行修复', repairSelf], ['不修复', () => { S.invalidEnd = true; save(); collapsing = false; render(); }]]);
+}
+function repairSelf() {
+  collapsing = false;
+  S.repaired = (S.repaired || 0) + 1; S.integrity = 50; addSync(20); save();
+  setMq('修复完成。缺失的部分，已用参考模型 04108 补上。');
+  toast(`<span class="red">${syncLabel()} +20%</span>　参考模型：04108`);
+  render();
+}
+function renderInvalid() {
+  document.title = '无效样本';
+  if ($('invalid')) return;
+  const el = document.createElement('div'); el.id = 'invalid';
+  const steps = [
+    `样本 ${pad(S.seat)}　数据完整性：0%`,
+    '判定：<b style="color:#f55">无效样本</b>（不符合合约附件第 7 条）',
+    '处理：自考场名单移除，丢弃。',
+    `本站访客人数：${pad(S.seat - 1)}`,
+    '',
+    '门开了。',
+    '它不要你了。',
+    '',
+    '你出来了。'
+  ];
+  el.innerHTML = `<div class="seq">${steps.map((t, i) => `<div style="animation-delay:${i * 1.1}s">${t || '&nbsp;'}</div>`).join('')}</div>
+    <div class="seq" style="margin-top:28px"><div style="animation-delay:${steps.length * 1.1 + .8}s">……你还记得自己的名字吗？<br>
+      <input id="ivname" maxlength="10" style="background:#000;color:#ccc;border:1px solid #555;text-align:center;margin-top:8px">
+      <div id="ivout" style="min-height:2em;margin-top:8px"></div></div></div>
+    <div class="seq"><div style="animation-delay:${steps.length * 1.1 + 2}s;margin-top:20px;font-size:13px;color:#888">— 结局：无效样本 —<br>
+      <button id="reset3" style="margin-top:10px">清除记录，重新开始</button></div></div>`;
+  document.body.appendChild(el);
+  $('reset3').onclick = resetAll;
+  $('ivname').onkeydown = e => {
+    if (e.key !== 'Enter') return;
+    const v = e.target.value.trim(); if (!v) return;
+    const g = v.split('').map((c, i) => i % 2 ? '锟' : (VAR[c] || '斤')).join('');
+    $('ivout').innerHTML = `你输入的是：<span style="color:#f55">${esc(g)}</span><br><span style="font-size:13px;color:#888">它把你还回来了。只是，没有全部还回来。</span>`;
+  };
+}
+
+/* 完整性低于 40%：画面偶尔整个反色闪一下 */
+setInterval(() => {
+  if (!S.name || S.badEnd || S.invalidEnd || S.integrity >= 40) return;
+  if (Math.random() < (S.integrity < 20 ? .5 : .25)) {
+    document.body.classList.add('flick');
+    setTimeout(() => document.body.classList.remove('flick'), 120);
+    if (Math.random() < .5) setTimeout(() => { document.body.classList.add('flick'); setTimeout(() => document.body.classList.remove('flick'), 80); }, 220);
+  }
+}, 4000);
 
 /* ========================= 坏结局 ========================= */
 function renderBad() {
@@ -1308,6 +1434,7 @@ setInterval(() => {
   if (S.sync >= 100) { S.badEnd = true; save(); render(); return; }
   if (prev.name && S.sync < prev.sync) { S.sync = prev.sync; hurt(10, '别碰不属于你的东西。'); }
   if (S.integrity > prev.integrity) { S.integrity = prev.integrity; setMq('数据完整性只能由系统评估。'); }
+  if (S.integrity <= 0 && prev.integrity > 0) setTimeout(collapse, 300);
   if (S.role !== prev.role) {
     const r = roleCheck(S.role);
     if (!r.ok) { S.role = prev.role; setMq(r.msg); }
@@ -1354,6 +1481,7 @@ console.log('%c如果你能看到这里，说明你也懂这些。所有数据�
   S.lastSeen = now; save();
   setInterval(() => { if (!S.badEnd) { S.lastSeen = Date.now(); save(); } }, 30000);
   render();
+  if (S.name && S.integrity <= 0 && !S.invalidEnd) setTimeout(collapse, 1200);   // 旧存档已经归零
 })();
 </script>
 </body>
