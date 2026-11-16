@@ -114,7 +114,7 @@
   #boot { position:fixed; inset:0; background:#000; color:#aaa; font-family:"Courier New",monospace; white-space:pre-wrap; padding:30px; z-index:120; font-size:14px; line-height:1.6; }
   fieldset.adm { border:2px groove #ddd; margin:10px 0; padding:6px 12px; background:#f4f4f4; }
   fieldset.adm legend { font-weight:bold; color:#0a246a; }
-  #intro { position:fixed; inset:0; background:#eef1f5; z-index:110; overflow:auto; font-family:-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif; color:#1f2328; }
+  #intro { position:fixed; inset:0; background:#eef1f5; z-index:130; overflow:auto; font-family:-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif; color:#1f2328; }
   #intro .wrap { max-width:640px; margin:28px auto; padding:0 14px; }
   #intro .crumb { font-size:13px; color:#6b7280; margin-bottom:10px; }
   #intro .card { background:#fff; border-radius:12px; box-shadow:0 1px 3px rgba(0,0,0,.08); padding:18px 20px; margin-bottom:12px; }
@@ -150,12 +150,19 @@
   .dm-badge { position:absolute; top:-4px; right:-4px; background:#ef4444; color:#fff; font-size:12px; min-width:20px; height:20px; border-radius:10px; line-height:20px; animation:tin .3s; }
   .dm-peek { position:absolute; left:62px; bottom:8px; background:#fff; color:#1f2328; border-radius:12px; padding:8px 12px; font-size:13px; white-space:nowrap; max-width:70vw; overflow:hidden; text-overflow:ellipsis; box-shadow:0 4px 14px rgba(0,0,0,.2); opacity:0; transform:translateY(6px); transition:all .3s; pointer-events:none; }
   .dm-peek.show { opacity:1; transform:none; }
+  .dm-bg { display:none; }
+  @media (max-width:600px) {
+    .dm-bg { display:block; position:fixed; inset:0; background:rgba(0,0,0,.35); z-index:-1; }
+    .dm-panel { position:fixed; left:0; right:0; bottom:0; width:100% !important; margin:0 !important; border-radius:16px 16px 0 0 !important; }
+    .dm-panel ~ .dm-fab, .dm-panel ~ .dm-peek { display:none; }
+    .dm-log { height:min(320px,48vh) !important; }
+  }
   .dm-panel { width:min(320px,88vw); background:#fff; color:#1f2328; border-radius:14px; box-shadow:0 8px 30px rgba(0,0,0,.3); margin-bottom:10px; overflow:hidden; }
   .dm-head { display:flex; align-items:center; gap:10px; padding:10px 12px; border-bottom:1px solid #eef1f5; }
   .dm-head .av { width:34px; height:34px; border-radius:50%; background:#f4a3b5; color:#fff; display:flex; align-items:center; justify-content:center; font-weight:bold; }
   .dm-head .nm { font-weight:600; font-size:14px; } .dm-head .tm { font-size:12px; color:#6b7280; } .dm-head a { color:#2563eb; }
   .dm-x { cursor:pointer; color:#9aa5b1; font-size:20px; padding:0 4px; }
-  .dm-log { height:min(300px,45vh); overflow:auto; padding:10px 12px; background:#f6f7f9; }
+  .dm-log { height:min(300px,38vh); overflow:auto; padding:10px 12px; background:#f6f7f9; }
   .dm-msg { margin:6px 0; max-width:82%; } .dm-msg .b { background:#fff; border-radius:12px; padding:7px 11px; font-size:14px; line-height:1.6; box-shadow:0 1px 2px rgba(0,0,0,.06); }
   .dm-msg .t { font-size:11px; color:#9aa5b1; margin:2px 4px; } .dm-msg.me { margin-left:auto; } .dm-msg.me .b { background:#2563eb; color:#fff; } .dm-msg.me .t { text-align:right; }
   .dm-empty, .dm-typing, .dm-hint { font-size:12px; color:#9aa5b1; } .dm-empty { text-align:center; margin-top:40px; }
@@ -211,6 +218,8 @@
   .fin-epi { max-width:520px; margin:24px auto 0; text-align:left; }
   .fin-card { background:#111; border:1px solid #333; border-radius:8px; padding:10px 14px; margin:10px 0; font-family:-apple-system,"Segoe UI","Microsoft YaHei",sans-serif; font-size:14px; }
   #finale button { font-family:inherit; }
+  #intro .endrow { padding:6px 0; border-bottom:1px solid #f0f0f0; font-size:14px; } #intro .endrow.locked { color:#c0c4cc; letter-spacing:2px; }
+  #intro .go2 { display:block; width:100%; margin:6px 0; padding:8px; border:1px solid #2563eb; color:#2563eb; background:#fff; border-radius:8px; cursor:pointer; font-family:inherit; font-size:13px; }
   .restored { border:2px dashed #c00; padding:6px; margin-top:6px; color:#c00; }
 
   /* 坏结局 */
@@ -264,7 +273,7 @@ const DEFAULT = {
   name: null, seat: SEAT, role: 'student',
   sync: 0, integrity: 100,
   exam: [false, false, false], q4: false,
-  dumpSeen: false, binSeen: false, clues: [], blogLogin: false, q4wrong: 0, opened: [], chatOpen: false, chatLog: [], chatAsked: [], chatCreep: false, chatCount: {}, invalidEnd: false, repaired: 0, introSeen: false, stage: 1, split: false, dm: [], dmUnread: 0, dmS1: false, s2told: false, dmHello: false, q5: false, q6: false, q7: false, q8: false, q9: false, s2done: false, noteOrder: [], q9pick: -1, s3start: false, ev: [], conc: [], statusSeen: false, reg: 0, regBump1: false, s3done: false, s3promise: false, askBlame: false, stopUnlocked: false, released: false, disputed: false, q10: '', final: '', fakeDate: 0, fakeSetAt: 0, exitTries: 0, exitLin: false, adminSeen: false, realClock: false, boardSeen: false, terminal: false, ghost: false, demoDone: false, badEnd: false,
+  dumpSeen: false, binSeen: false, clues: [], blogLogin: false, q4wrong: 0, opened: [], chatOpen: false, chatLog: [], chatAsked: [], chatCreep: false, chatCount: {}, invalidEnd: false, repaired: 0, introSeen: false, stage: 1, split: false, dm: [], dmUnread: 0, dmS1: false, s2told: false, dmHello: false, q5: false, q6: false, q7: false, q8: false, q9: false, s2done: false, noteOrder: [], q9pick: -1, s3start: false, ev: [], conc: [], statusSeen: false, reg: 0, regBump1: false, s3done: false, s3promise: false, askBlame: false, stopUnlocked: false, released: false, disputed: false, q10: '', final: '', published: false, finalCheckpoint: null, calibrationSeen: false, fakeDate: 0, fakeSetAt: 0, exitTries: 0, exitLin: false, adminSeen: false, realClock: false, boardSeen: false, terminal: false, ghost: false, demoDone: false, badEnd: false,
   lastSeen: 0, visits: 0
 };
 
@@ -284,6 +293,8 @@ function parse(raw) {
   return s;
 }
 function save() {
+  // 存档前先看有没有人（F12）改过存档：有的话先吸收，免得被盖掉
+  if (typeof pollStore === 'function' && readStore() !== lastRaw && !save.busy) { save.busy = true; try { pollStore(true); } finally { save.busy = false; } }
   const raw = JSON.stringify(S);
   try { localStorage.setItem(CFG.key, raw); } catch (e) {}
   lastRaw = raw;
@@ -293,6 +304,69 @@ S = parse(lastRaw) || Object.assign({}, DEFAULT);
 
 /* ========================= 工具 ========================= */
 const $ = id => document.getElementById(id);
+const gameTimers = new Set();
+const gameAudio = new Set();
+let timelineVersion = 0;
+const isEnded = () => !!(S.final || S.badEnd || S.invalidEnd);
+function gameLater(callback, delay = 0) {
+  if (isEnded()) return null;
+  const version = timelineVersion;
+  const timer = window.setTimeout(() => {
+    gameTimers.delete(timer);
+    if (version === timelineVersion && !isEnded()) callback();
+  }, delay);
+  gameTimers.add(timer);
+  return timer;
+}
+function stopTimeline() {
+  timelineVersion++;
+  gameTimers.forEach(timer => window.clearTimeout(timer));
+  gameTimers.clear();
+  gameAudio.forEach(context => { context.close().catch(() => {}); });
+  gameAudio.clear();
+  dlgQ.length = 0; dmQ.length = 0;
+  dmTyping = false; chatBusy = false; chatTimer = null;
+  demoBusy = false; replayRunning = false; beeping = false;
+  collapsing = false; notePick = -1;
+  document.querySelectorAll('.dlg-mask,.toast,#boot').forEach(el => el.remove());
+  document.body.classList.remove('flick');
+  document.body.style.filter = '';
+}
+function captureFinalCheckpoint() {
+  if (S.finalCheckpoint) return;
+  const state = JSON.parse(JSON.stringify(S));
+  delete state.finalCheckpoint;
+  state.final = ''; state.askBlame = false;
+  // Rewind the historical clock as well as the story, rather than letting it expire offscreen.
+  if (state.fakeDate) { state.fakeDate = sysNow().getTime(); state.fakeSetAt = Date.now(); }
+  S.finalCheckpoint = { version: 1, state, mq: mqText };
+  save();
+}
+function returnToFinalChoice() {
+  let checkpoint = S.finalCheckpoint;
+  // Pre-checkpoint saves can still return. Remove the old decision's conversation where identifiable.
+  if (!checkpoint || checkpoint.version !== 1 || !checkpoint.state) {
+    const state = JSON.parse(JSON.stringify(S));
+    delete state.finalCheckpoint;
+    const at = state.dm.findIndex(([who, message], i, log) => who === 'me' && (
+      message.startsWith('我找到他留给你的话了。') ||
+      message.startsWith('证据我都有了，包括那天晚上') ||
+      (message === '……' && log[i + 1] && log[i + 1][1] === '你还在吗？')));
+    if (at >= 0) state.dm = state.dm.slice(0, at);
+    state.final = ''; state.askBlame = false;
+    checkpoint = { version: 1, state, mq: '交卷前：请决定把哪些信息交给小美。' };
+  }
+  stopTimeline();
+  S = parse(JSON.stringify(checkpoint.state));
+  S.final = ''; S.askBlame = false; S.finalCheckpoint = null;
+  if (S.fakeDate) S.fakeSetAt = Date.now();
+  S.lastSeen = Date.now();
+  save();
+  document.querySelectorAll('#finale,#site,#intro').forEach(el => el.remove());
+  document.title = `${CFG.school} 校园内联网`;
+  location.hash = '#/floppy';
+  dmOpen = true; dmKeepOpen = true; render(); setMq(checkpoint.mq);
+}
 const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const pad = n => String(n).padStart(6, '0');
 const daysSince = () => Math.floor((Date.now() - new Date(2004, 5, 18)) / 864e5);
@@ -305,9 +379,10 @@ const beforeDereg = () => sysNow() < DEREG;
 function setMq(t) { mqText = t; $('mq').textContent = t; }
 const syncLabel = () => S.sync >= 25 ? '记忆同步率' : '考试进度';
 function addSync(n) {
+  if (isEnded()) return;
   const before = S.sync;
   S.sync = Math.min(99, S.sync + n);
-  if (before < 25 && S.sync >= 25) setTimeout(() => {
+  if (before < 25 && S.sync >= 25) gameLater(() => {
     setMq('系统提示：“考试进度”已更名为“记忆同步率”。');
     dialog('系统通知', '为配合考场协议，<br>“考试进度”即日起更名为<span class="red">“记忆同步率”</span>。<br><br><span class="small">你浏览过的每一份资料，都已计入。</span>');
   }, 600);
@@ -356,24 +431,26 @@ const CLUES = [
 ];
 function toast(t) {
   const d = document.createElement('div'); d.className = 'toast'; d.innerHTML = t;
-  document.body.appendChild(d); setTimeout(() => d.remove(), 3200);
+  document.body.appendChild(d); gameLater(() => d.remove(), 3200);
 }
 function clue(id, n = 2) {
+  if (isEnded()) return;
   if (S.clues.includes(id)) return;
   S.clues.push(id); addSync(n); save();
   if (S.name) renderNav();
   toast(`📝 草稿纸已更新（${S.clues.length}/${CLUES.length}）　<span class="red">${syncLabel()} +${n}%</span>`);
 }
 function hurt(n, msg) {
+  if (isEnded()) return;
   S.integrity = Math.max(0, S.integrity - n);
-  if (S.integrity <= 0) setTimeout(collapse, 300);
+  if (S.integrity <= 0) gameLater(collapse, 300);
   if (msg) setMq(msg);
 }
 
 /* 对话框排队：一次只显示一个，关掉一个才出下一个 */
 const dlgQ = [];
-function dlgShow(build) { if (document.querySelector('.dlg-mask')) dlgQ.push(build); else build(); }
-function dlgNext() { setTimeout(() => { if (!document.querySelector('.dlg-mask') && dlgQ.length) dlgQ.shift()(); }, 60); }
+function dlgShow(build) { if (isEnded()) return; if (document.querySelector('.dlg-mask')) dlgQ.push(build); else build(); }
+function dlgNext() { gameLater(() => { if (!document.querySelector('.dlg-mask') && dlgQ.length) dlgQ.shift()(); }, 60); }
 
 /* 多按钮对话框：btns = [[文字, 回调], ...] */
 function dialog2(title, body, btns) { dlgShow(() => {
@@ -410,7 +487,7 @@ function renderNav() {
   if (!S.name) { $('nav').innerHTML = '<span class="small">尚未登录。访客请输入姓名进入考场。</span>'; return; }
   $('nav').innerHTML = `
     <span class="who">考生：<b>${S.sync >= 45 && Math.random() < .25 ? '林子轩' : esc(S.name)}</b>（座号 ${pad(S.seat)}）｜身份：${esc(S.role)}｜${syncLabel()}：<b class="red">${S.sync}%</b>｜数据完整性：${S.integrity}%</span>
-    <a href="#/home">公告栏</a><a href="#/exam">期末考试</a>${navItem('board', '#/board', '留言板')}${navItem('tools', '#/tools', '工具箱')}${navItem('chat', '#/chat', '聊天室')}
+    <a href="#/home">公告栏${canCalibrate() ? '（校准请求）' : ''}</a><a href="#/exam">期末考试</a>${navItem('board', '#/board', '留言板')}${navItem('tools', '#/tools', '工具箱')}${navItem('chat', '#/chat', '聊天室')}
     ${S.terminal ? '<a href="#/terminal" style="color:#c00">系统调试台</a>' : ''}
     ${S.role === 'chen_admin' ? '<a href="#/admin" style="color:#c00">管理后台</a>' : ''}${S.s2done ? '<a href="#/floppy">A:\\</a>' : ''}<a href="#/notes">草稿纸</a><a href="#/archive">机密档案</a><a href="#" id="logout">登出</a>`;
   $('logout').onclick = e => { e.preventDefault(); dialog('考场纪律', '⛔ 交卷前严禁离席。'); };
@@ -419,7 +496,7 @@ function renderNav() {
 function renderFoot() {
   const ms = sysNow() - EPOCH;
   const d = Math.floor(ms / 864e5), h = Math.floor(ms / 36e5) % 24;
-  $('foot').innerHTML = `本站访客人数：<b>${pad(S.name ? (S.reg || S.seat) : S.seat - 1)}</b>　｜　服务器运行时间：${ms < 0 ? '尚未上线' : `${d.toLocaleString()} 天 ${h} 小时`}<br>
+  $('foot').innerHTML = `累计登记人数：<b>${pad(S.name ? (S.reg || S.seat) : S.seat - 1)}</b>　｜　服务器运行时间：${ms < 0 ? '尚未上线' : `${d.toLocaleString()} 天 ${h} 小时`}<br>
     <!-- counter.asp by 04108 -->© 2004 ${CFG.school} 电脑组 ｜ ${CFG.domain} ｜ 维护：陈老师（分机 213）`;
 }
 
@@ -434,10 +511,13 @@ function render() {
   renderNav(); renderFoot();
   const r = route();
   if (r !== 'zhixu' && $('site')) $('site').remove();
+  // 换到别的页面时收起私信窗，免得它盖住新页面上的按钮
+  if (r + location.hash !== render.lastRoute) { if (dmOpen && !dmKeepOpen) dmOpen = false; dmKeepOpen = false; render.lastRoute = r + location.hash; }
   (OPEN[r] && !OPEN[r]() ? R.closed : (R[r] || R.home))();
   corrupt();
   if (S.name) checkUnlocks();
   renderDM();
+  offerCalibration();
 }
 window.addEventListener('hashchange', render);
 
@@ -482,10 +562,12 @@ function showIntro() {
     <div class="card rep"><div class="who"><div class="av">美</div><div><div class="nm">小美（2004 届）</div><div class="tm">今天</div></div></div><p>@MikaL @chewie_88 对不起。请先别关网页，回复我。</p></div>` : ''}
     ${S.released ? '<div class="card rep"><div class="who"><div class="av g">K</div><div><div class="nm">Kelvin_T</div><div class="tm">刚刚</div></div></div><p>……我刚刚终于关掉网页了。好像睡了很久。谢谢。</p></div>' : ''}
     ${S.s3promise ? '<div class="note">🔒 楼主已锁帖。</div>' : ''}
+    ${endingsHtml()}
     <div class="note">本作品为虚构故事，校名、人物、公司与事件均为虚构。</div>
   </div>`;
   document.body.appendChild(d);
   $('introgo').onclick = () => { S.introSeen = true; save(); d.remove(); renderDM(); };
+  bindEndings();
 }
 
 R.login = () => {
@@ -521,7 +603,7 @@ R.login = () => {
       [['确定', () => dialog('教务处', `缺考考生 ${esc(n)} 已列入补考名单。<br><span class="red">补考现在开始。</span>`, enter)], ['返回', ticket]]);
     const enter = () => {
       S.name = n; S.visits++; S.role = 'student'; addSync(2); save();
-      if (!S.dmHello) { S.dmHello = true; save(); setTimeout(() => dmSay(['谢谢你愿意帮我。', '进去以后，有什么发现，可以私信我。']), 2500); }
+      if (!S.dmHello) { S.dmHello = true; save(); gameLater(() => dmSay(['谢谢你愿意帮我。', '进去以后，有什么发现，可以私信我。']), 2500); }
       if (triedAdmin) clue('admin');
       setMq(`欢迎【${n}】同学！你已缺考 ${daysSince().toLocaleString()} 天，请立即前往教务处补考。`);
       location.hash = '#/home'; render();
@@ -538,10 +620,29 @@ R.login = () => {
   $('nm').onkeydown = $('pw').onkeydown = e => { if (e.key === 'Enter') go(); };
 };
 
+/* 完整校准是玩家主动接受的最后一步；普通调查最多到 99%，不会意外结束游戏。 */
+const canCalibrate = () => !!S.name && S.sync >= 90 && !S.disputed && !S.published && !isEnded();
+function offerCalibration() {
+  if (!canCalibrate() || S.calibrationSeen) return;
+  S.calibrationSeen = true; save();
+  toast('系统：记忆校准尚未完成。可前往【公告栏】申请结束考试。');
+}
+function calibrationHtml() {
+  return canCalibrate() ? `<div class="post"><b>系统自动通知：完整记忆校准</b>
+    <p>检测到记忆差异。完成剩余校准后，考生即可结束考试。</p>
+    <button id="calibrate">申请完整校准</button> <span class="small">当前同步率：${S.sync}%</span></div>` : '';
+}
+function requestCalibration() {
+  if (!canCalibrate()) return;
+  dialog2('完整记忆校准', '系统将把同步率补足至 <b>100%</b>，并将考生登记为永久档案。<br>校准后无法撤回。<br><br><span class="red">是否继续结束考试？</span>',
+    [['接受完整校准', () => {
+      S.sync = 100; S.badEnd = true; save(); render();
+    }], ['暂不校准', () => {}]]);
+}
 /* ========================= 公告栏 ========================= */
 R.home = () => {
   $('main').innerHTML = `
-    <h3>📢 教务处公告栏</h3>
+    <h3>📢 教务处公告栏</h3>${calibrationHtml()}
     <div class="post"><div class="meta">${nowStr().slice(0,10)}　｜　发布：系统自动</div>
       <span class="red">补考通知：考生 ${esc(S.name)}，你已缺考 ${daysSince().toLocaleString()} 天。请尽快完成【期末考试】。</span></div>
     <div class="post"><div class="meta">2004-06-18 23:59　｜　发布：系统自动</div>
@@ -555,6 +656,7 @@ R.home = () => {
       <p class="small">（本公告字数较多，部分内容可能无法正常显示。）</p></div>
     <div class="post"><div class="meta">2004-06-10　｜　发布：总务处</div>
       本周五旧实验楼进行电力检修，电脑室暂停开放。</div>`;
+  if ($('calibrate')) $('calibrate').onclick = requestCalibration;
 };
 
 /* ========================= 期末考试 ========================= */
@@ -590,7 +692,7 @@ R.exam = () => {
   }
   if (S.stage >= 2) h = `<details class="qd"><summary>✔ 第 1～4 题（已作答）</summary>${h}</details>` + stage2Html();
   $('main').innerHTML = head + h;
-  if (S.stage >= 2) { bindStage2(); bindQ10(); const c = $('cur'); if (c) setTimeout(() => c.scrollIntoView({ block: 'center' }), 50); }
+  if (S.stage >= 2) { bindStage2(); bindQ10(); const c = $('cur'); if (c) gameLater(() => c.scrollIntoView({ block: 'center' }), 50); }
   $('main').querySelectorAll('button[data-q]').forEach(b => b.onclick = () => answer(+b.dataset.q, +b.dataset.o));
   if ($('q4go')) {
     $('q4go').onclick = () => q4submit($('q4in').value);
@@ -820,7 +922,7 @@ function runTerm(raw) {
         if (r.ok) { S.role = v; if (r.ghost) S.ghost = true; tprint(r.msg, 'ok'); }
         else { tprint(r.msg, 'bad'); if (v !== 'chen_admin') hurt(10, '别碰不属于你的东西。'); }
         save();
-        if (r.ghost) { setTimeout(() => { location.hash = '#/archive'; }, 1200); }
+        if (r.ghost) { gameLater(() => { location.hash = '#/archive'; }, 1200); }
       } else if (k === 'sync') {
         const n = Number(v);
         if (n >= 100) { S.sync = 100; S.badEnd = true; save(); render(); return; }
@@ -868,7 +970,7 @@ R.notes = () => {
   CLUES.forEach((c, i) => {
     h += S.clues.includes(c[0]) ? `<div>${i + 1}. ${c[1]}</div>` : `<div style="color:#bbb">${i + 1}. ？？？</div>`;
   });
-  setTimeout(() => { const r = $('reintro2'); if (r) r.onclick = e => { e.preventDefault(); showIntro(); }; }, 0);
+  gameLater(() => { const r = $('reintro2'); if (r) r.onclick = e => { e.preventDefault(); showIntro(); }; }, 0);
   if (got.length >= 5) h += `<div class="hand">别再往下查了。你知道得越多，它就越认得你。</div>`;
   if (S.clues.includes('secret')) h += `<div class="hand">谢谢你还记得我。可是小美的那张软盘，到现在还没有人打开过。　——子轩</div>`;
   h += `</div>`;
@@ -1152,7 +1254,7 @@ R['~chen'] = () => {
   if ($('blogout')) $('blogout').onclick = e => { e.preventDefault(); S.blogLogin = false; save(); render(); };
   if (login && S.clues.includes('secret')) {
     // 读到草稿箱，记下合约的线索
-    setTimeout(() => { clue('quota', 3); clue('letter', 3); }, 400);
+    gameLater(() => { clue('quota', 3); clue('letter', 3); }, 400);
   }
 };
 
@@ -1251,18 +1353,19 @@ let chatBusy = false, chatTimer = null;
 const hhmm = () => new Date().toTimeString().slice(0, 5);
 function chatPush(w, t) { S.chatLog.push([w, t, hhmm()]); if (S.chatLog.length > 120) S.chatLog.shift(); save(); refreshChat(); }
 function linSay(lines, done) {
+  if (isEnded()) return;
   chatBusy = true; refreshChat();
   let i = 0;
   const next = () => {
     if (i >= lines.length) {
       chatBusy = false;
-      if (S.sync >= 45 && !S.chatCreep) { S.chatCreep = true; save(); setTimeout(() => linSay(['……', '你打字的节奏，跟我好像。']), 1500); }
+      if (S.sync >= 45 && !S.chatCreep) { S.chatCreep = true; save(); gameLater(() => linSay(['……', '你打字的节奏，跟我好像。']), 1500); }
       refreshChat(); done && done(); return;
     }
     const t = lines[i++];
     const w = t.startsWith('[') ? 'sys' : 'lin';
     if ($('qtyping')) $('qtyping').textContent = w === 'lin' ? '04108 正在输入……' : '';
-    setTimeout(() => { chatPush(w, t); next(); }, 500 + Math.min(1600, t.length * 90));
+    gameLater(() => { chatPush(w, t); next(); }, 500 + Math.min(1600, t.length * 90));
   };
   next();
 }
@@ -1339,7 +1442,7 @@ function checkUnlocks() {
   }
   // 留言板开放、玩家第一次去看过之后，04108 会主动传讯息
   if (S.boardSeen && !S.chatOpen && !chatTimer) {
-    chatTimer = setTimeout(() => {
+    chatTimer = gameLater(() => {
       S.chatOpen = true; save(); renderNav();
       toast('🔔 叮咚！04108 给你发来一条消息。');
       setMq('聊天室：04108 正在等你。');
@@ -1357,15 +1460,15 @@ function forceExit() {
     'NYMX EXAM SERVER  build 2004.06.18', '正在启动……', `已恢复 1 个未结束的考试会话：${pad(S.seat)}`];
   let i = 0; document.title = '……';
   const step = () => {
-    if (i < lines.length) { o.textContent += lines[i++] + '\n'; setTimeout(step, i === 3 ? 1800 : 650); return; }
-    setTimeout(() => {
+    if (i < lines.length) { o.textContent += lines[i++] + '\n'; gameLater(step, i === 3 ? 1800 : 650); return; }
+    gameLater(() => {
       o.remove(); document.title = `${CFG.school} 校园内联网`; termLog = [];
       location.hash = '#/home'; render();
       dialog('考场', n === 1 ? `欢迎回来，${esc(S.name)} 同学。<br>你的考试尚未结束。`
         : n === 2 ? '又见面了。'
         : `离席记录：${n} 次。<br><span class="red">你还要试几次？</span>`);
       setMq(`离席记录：${n} 次。离席时间已计入${syncLabel()}。`);
-      if (n >= 3 && S.chatOpen && !S.exitLin) setTimeout(() => {
+      if (n >= 3 && S.chatOpen && !S.exitLin) gameLater(() => {
         S.exitLin = true; S.chatLog.push(['lin', '别再试了。', hhmm()], ['lin', '我试过四千一百零八次。', hhmm()]); save();
         toast('🔔 04108 给你发来一条消息。');
       }, 4000);
@@ -1418,10 +1521,10 @@ R.admin = () => {
 /* 每秒检查系统时间：一过 23:42，管理员会话立刻被踢出 */
 let lastMin = -1;
 setInterval(() => {
-  if (!S.name || S.badEnd) return;
+  if (!S.name || isEnded()) return;
   if (S.role === 'chen_admin' && !beforeDereg()) {
     S.role = 'student'; save();
-    document.body.style.filter = 'invert(1)'; setTimeout(() => { document.body.style.filter = ''; }, 250);
+    document.body.style.filter = 'invert(1)'; gameLater(() => { document.body.style.filter = ''; }, 250);
     dialog('⛔ 会话已终止', '账号 <b>chen_admin</b> 已于 2004-06-18 23:42 注销。<br><span class="small">注销来源：zhixu_remote</span>', () => { location.hash = '#/home'; });
     render(); return;
   }
@@ -1536,7 +1639,7 @@ function bindStage2() {
     if (!solved()) return;
     S.q7 = true; save(); clue('note2', 3);
     dialog('字条背面', `<canvas id="noteback" width="360" height="200" style="max-width:100%;border:1px solid #aaa"></canvas>`);
-    setTimeout(() => { const c = $('noteback'); if (c) drawNoteFace(c, true); }, 80);
+    gameLater(() => { const c = $('noteback'); if (c) drawNoteFace(c, true); }, 80);
     render();
   };
 
@@ -1566,12 +1669,12 @@ function playBeep() {
   let t = 0;
   seq.forEach(([on, off]) => {
     const start = t;
-    setTimeout(() => { const l = $('lamp'); if (l) l.classList.add('on'); }, start * U);
-    setTimeout(() => { const l = $('lamp'); if (l) l.classList.remove('on'); }, (start + on) * U);
-    if (ctx) { const o = ctx.createOscillator(), g = ctx.createGain(); o.frequency.value = 880; g.gain.value = .08; o.connect(g); g.connect(ctx.destination); o.start(ctx.currentTime + start * U / 1000); o.stop(ctx.currentTime + (start + on) * U / 1000); }
+    gameLater(() => { const l = $('lamp'); if (l) l.classList.add('on'); }, start * U);
+    gameLater(() => { const l = $('lamp'); if (l) l.classList.remove('on'); }, (start + on) * U);
+    if (ctx) { gameAudio.add(ctx); const o = ctx.createOscillator(), g = ctx.createGain(); o.frequency.value = 880; g.gain.value = .08; o.connect(g); g.connect(ctx.destination); o.start(ctx.currentTime + start * U / 1000); o.stop(ctx.currentTime + (start + on) * U / 1000); }
     t += on + off;
   });
-  setTimeout(() => { beeping = false; }, t * U + 200);
+  gameLater(() => { beeping = false; if (ctx) { gameAudio.delete(ctx); ctx.close().catch(() => {}); } }, t * U + 200);
 }
 
 /* 第 7 题：用程序画出字条，切成六片 */
@@ -1615,11 +1718,11 @@ function runReplay() {
     const box = $('rtype'); if (!box) { replayRunning = false; return; }
     if (li >= lines.length) {
       box.innerHTML = out + '<div class="small">22:41:37　上传 IMG_0618.JPG → /~lin/album（账号 lin04108）</div>';
-      S.q8 = true; save(); replayRunning = false; setMq('有人用子轩的账号写完了那篇作文。'); setTimeout(render, 1800); return;
+      S.q8 = true; save(); replayRunning = false; setMq('有人用子轩的账号写完了那篇作文。'); gameLater(render, 1800); return;
     }
     const line = lines[li];
-    if (ci < line.length) { ci++; box.innerHTML = out + `<div>${line.slice(0, ci)}<span class="caret">▌</span></div>`; setTimeout(tick, 90); }
-    else { out += `<div>${line}</div>`; li++; ci = 0; setTimeout(tick, 600); }
+    if (ci < line.length) { ci++; box.innerHTML = out + `<div>${line.slice(0, ci)}<span class="caret">▌</span></div>`; gameLater(tick, 90); }
+    else { out += `<div>${line}</div>`; li++; ci = 0; gameLater(tick, 600); }
   };
   tick();
 }
@@ -1684,7 +1787,7 @@ R.floppy = () => {
    小美的私信窗：现实世界的东西，放在内联网的框外
    （内联网再怎么坏掉，这个窗口都不会被污染）
    =================================================================== */
-let dmOpen = false, dmTyping = false;
+let dmOpen = false, dmTyping = false, dmKeepOpen = false;
 const dmTime = () => new Date().toTimeString().slice(0, 5);
 function dmPush(w, t) {
   S.dm.push([w, t, dmTime()]); if (S.dm.length > 80) S.dm.shift();
@@ -1693,20 +1796,21 @@ function dmPush(w, t) {
 }
 const dmQ = [];
 function dmSay(lines, done) {
+  if (isEnded()) return;
   if (dmTyping) { dmQ.push([lines, done]); return; }   // 一段说完，才说下一段
   dmTyping = true; renderDM();
   let i = 0;
   const next = () => {
     if (i >= lines.length) { dmTyping = false; renderDM(); done && done(); if (dmQ.length) { const [l, d] = dmQ.shift(); dmSay(l, d); } return; }
     const t = lines[i++];
-    setTimeout(() => { dmPush('xm', t); next(); }, 900 + Math.min(1800, t.length * 70));
+    gameLater(() => { dmPush('xm', t); next(); }, 900 + Math.min(1800, t.length * 70));
   };
   next();
 }
 function dmPeek(t) {
   const p = $('dmpeek'); if (!p) return;
   p.textContent = '小美：' + t; p.classList.add('show');
-  clearTimeout(dmPeek.t); dmPeek.t = setTimeout(() => p.classList.remove('show'), 4000);
+  clearTimeout(dmPeek.t); dmPeek.t = gameLater(() => p.classList.remove('show'), 4000);
 }
 /* 玩家能回复的内容，随剧情出现 */
 function dmOptions() {
@@ -1740,7 +1844,7 @@ function renderDM() {
   const opts = dmTyping ? [] : dmOptions();
   el.innerHTML = `
     <div id="dmpeek" class="dm-peek"></div>
-    ${dmOpen ? `<div class="dm-panel">
+    ${dmOpen ? `<div class="dm-bg" id="dmbg"></div><div class="dm-panel">
       <div class="dm-head"><div class="av">美</div><div style="flex:1"><div class="nm">小美（2004 届）</div><div class="tm">私信 ｜ <a href="#" id="dmpost">她的求助帖</a></div></div><span id="dmclose" class="dm-x">×</span></div>
       <div class="dm-log" id="dmlog">${S.dm.length ? S.dm.map(([w, t, tm]) =>
         `<div class="dm-msg ${w === 'me' ? 'me' : ''}"><div class="b">${esc(t)}</div><div class="t">${tm}</div></div>`).join('')
@@ -1750,12 +1854,15 @@ function renderDM() {
         : '<span class="dm-hint">（现在没有要回复的。）</span>'}</div></div>` : ''}
     <button class="dm-fab" id="dmfab" title="小美的私信">美${S.dmUnread ? `<span class="dm-badge">${S.dmUnread}</span>` : ''}</button>`;
   $('dmfab').onclick = () => { dmOpen = !dmOpen; if (dmOpen) S.dmUnread = 0; save(); renderDM(); };
+  if ($('dmbg')) $('dmbg').onclick = () => { dmOpen = false; renderDM(); };
   if (dmOpen) {
     const lg = $('dmlog'); lg.scrollTop = lg.scrollHeight;
     $('dmclose').onclick = () => { dmOpen = false; renderDM(); };
     $('dmpost').onclick = e => { e.preventDefault(); showIntro(); };
     el.querySelectorAll('.dm-opts button').forEach(b => b.onclick = () => {
-      const x = opts[+b.dataset.o]; dmPush('me', x[2] || x[0]); x[1]();
+      const x = opts[+b.dataset.o];
+      if (x[3]) captureFinalCheckpoint();
+      dmPush('me', x[2] || x[0]); x[1]();
     });
   }
 }
@@ -1847,13 +1954,15 @@ function demoSay(text) {
   const lines = demoReply(text); let i = 0;
   const next = () => {
     if (i >= lines.length) { demoBusy = false; render(); return; }
-    setTimeout(() => { demoLog.push(['ai', lines[i++]]); render(); next(); }, 700 + lines[i].length * 40);
+    gameLater(() => { demoLog.push(['ai', lines[i++]]); render(); next(); }, 700 + lines[i].length * 40);
   };
   next();
 }
 
 
 const reg = () => S.reg || S.seat;
+const activeSessions = () => Math.max(0, reg() - (S.released ? 1 : 0) - (S.invalidEnd ? 1 : 0));
+const pendingSessions = () => S.disputed || S.published ? 0 : activeSessions();
 const s3Done = () => MUST.every(c => S.conc.includes(c)) && S.statusSeen;
 function keep(id) { return S.ev.includes(id) ? '<span class="z-kept">已收进证据夹</span>' : `<button class="z-keep" data-k="${id}">📎 收进证据夹</button>`; }
 let z0007open = false, zMemo = false, zZoom = false;
@@ -1954,7 +2063,10 @@ R.zhixu = () => {
 对外宣传口径 .................. 5000 份有效样本
 实际登记数 .................... ${pad(reg())}
 示范模型（训练副本）.......... 已部署：MindPrint 体验版
-完整会话档案 .................. 待交付：${reg()} 份（含 NYMX-0001）
+当前会话 ...................... ${activeSessions()} 份（含 NYMX-0001）
+待交付会话 .................... ${pendingSessions()} 份
+已解除会话 .................... ${S.released ? 1 : 0} 份
+证据公开 ...................... ${S.published ? '已公开，调查已受理' : '未公开'}
 争议隔离 ...................... ${S.disputed ? '全部样本' : '0'}
 完整交付 ...................... 0
 远端维护排程 .................. 2026-12-17 23:42（新品发布前一天）
@@ -2033,7 +2145,8 @@ function bindSite() {
   if ($('zdispute')) $('zdispute').onclick = () => {
     S.disputed = true; save(); clue('dispute', 3);
     dialog('争议样本处理', '已受理。<br>争议隔离：全部样本。<br>批量交付：<b>暂停</b>，等待人工复核。');
-    setTimeout(() => dmSay(['他们……停下来了？', '谢谢你。', '可是，子轩还在里面，对不对？']), 1500);
+    gameLater(() => dmSay(['他们……停下来了？', '谢谢你。', '可是，子轩还在里面，对不对？'].concat(
+      has('mail') && has('sched') ? [] : ['还有……要是能证明，那天晚上是他们从外面动的手就好了。'])), 1500);
     render();
   };
   if ($('zcmp')) $('zcmp').onclick = () => {
@@ -2060,17 +2173,17 @@ function s3Story(id) {
   if (S.conc.length === 1) dmSay(['你在查他们？', '小心一点。']);
   if (id === 'h2' && !S.regBump1) {
     S.regBump1 = true; S.reg = reg() + 2; save();
-    setTimeout(() => dmSay(['……我的帖子下面，又多了两个人回复。', `他们说，进去以后座号是 ${pad(S.reg - 1)}、${pad(S.reg)}。`, '是我……是我把人带进去的？', '我已经在帖子最上面加了警告，叫大家不要再点了。你可以去看。']), 1500);
+    gameLater(() => dmSay(['……我的帖子下面，又多了两个人回复。', `他们说，进去以后座号是 ${pad(S.reg - 1)}、${pad(S.reg)}。`, '是我……是我把人带进去的？', '我已经在帖子最上面加了警告，叫大家不要再点了。你可以去看。']), 1500);
   }
-  if (id === 'c3') setTimeout(() => dmSay(['他们根本没删。', '那子轩的东西，他们也一样不会删，对吧。']), 1500);
-  if (id === 'c4') setTimeout(() => dmSay(['他自己的儿子……', '那句“请不要让爸爸再带同学来了”，被他们印在家长周报上，当成“孩子们的心声”。']), 1500);
+  if (id === 'c3') gameLater(() => dmSay(['他们根本没删。', '那子轩的东西，他们也一样不会删，对吧。']), 1500);
+  if (id === 'c4') gameLater(() => dmSay(['他自己的儿子……', '那句“请不要让爸爸再带同学来了”，被他们印在家长周报上，当成“孩子们的心声”。']), 1500);
   if (s3Done()) s3Finish();
 }
 function s3Finish() {
   if (S.s3done) return;
   S.s3done = true; save();
   setMq('— 第三阶段完成 —');
-  setTimeout(() => dmSay(['我找到那张盘了。', '我想，我知道密码是什么了。', `可是你说他们 12 月 17 日 23:42 就要动手……还差 ${5000 - reg()} 个人。`, '我们还有时间吗？']), 1500);
+  gameLater(() => dmSay(['我找到那张盘了。', '我想，我知道密码是什么了。', `可是你说他们 12 月 17 日 23:42 就要动手……还差 ${5000 - reg()} 个人。`, '我们还有时间吗？']), 1500);
 }
 
 /* ===================================================================
@@ -2121,7 +2234,7 @@ function bindStop() {
     S.released = true; save(); clue('release', 3);
     $('slog').innerHTML = '正在解除会话 004958……<br>会话 004958：最后输入“……”<br><b>会话 004958 已解除。对方已离线。</b>';
     setMq('会话 004958 已解除。');
-    setTimeout(() => dmSay(['Kelvin 回我了！', '他说他终于关掉网页了，好像睡了很久。', '他没事。他真的没事。', '所以……那个程序，是把人放出来，不是把人删掉。']), 1500);
+    gameLater(() => dmSay(['Kelvin 回我了！', '他说他终于关掉网页了，好像睡了很久。', '他没事。他真的没事。', '所以……那个程序，是把人放出来，不是把人删掉。']), 1500);
   };
 }
 
@@ -2152,48 +2265,74 @@ const FINALS = {
     `会话 ${pad(reg())} …… 解除`, '会话 004960 …… 解除', `会话 ${pad(S.seat)} …… 解除`, '会话 003390 …… 解除', '……', '',
     '04108：考完了。', '04108：谢谢你帮我交卷。', '04108：帮我跟她说，cendol 要两碗。', '',
     '会话 NYMX-0001：已解除', '模型目录 /models/04108：已删除', '连接已关闭。', '',
-    '本站访客人数：000000'],
+    '考场在线会话：000000', `累计登记人数：${pad(reg())}（历史记录）`],
     epi: () => [
       ['中央医院　护理记录', '持续二十二年的重复脑电活动停止。生命体征平稳。'],
       ['郑知序的信箱', '一份解除封存的旧记录，自动寄达。原始时间：2001-06-02。<br>“请不要让爸爸再带同学来了。”'],
-      ['知序教育科技', 'MindPrint 心智模型的发布，无限期延后。'],
+      S.published ? ['知序教育科技', '公开证据已提交调查。创办人郑知序就两起试点事故接受调查。MindPrint 下架。'] : ['知序教育科技', 'MindPrint 心智模型的发布，无限期延后。'],
       ['小美（2004 届）', '帖子已删除。<br>私信：“我去吃了 cendol。两碗。”']] },
+  expose: { name: '曝光', lines: () => [
+    '小美的帖子，换了一个标题：', '【公开】知序教育科技与 2001、2004 年两次试点事故的全部证据', '',
+    '附件：同意书｜BASE-12 与 MP-BASE 校验值｜何静的备忘录与批示｜郑总的邮件｜zhixu_remote 的注销排程', '',
+    '转发：3,841　｜　回复：1,206', '',
+    '争议隔离：全部样本　｜　批量交付：永久取消', '',
+    '04108：好多人在看。', '04108：他们不能再把我们交出去了？', '04108：……那我们什么时候能出去？'],
+    epi: () => [
+      ['新闻', '知序教育科技创办人郑知序，就 2001 年与 2004 年两起试点事故接受调查。'],
+      ['MindPrint', '产品下架。训练副本依法封存。'],
+      ['小美（2004 届）', '“全世界都知道了。”<br>“可是那张盘，我还没有用。”']] },
   keep: { name: '留下他', lines: () => [
-    '小美收到了一份留言。', '她没有收到 STOP.EXE 的测试结果。', '',
-    '争议隔离：全部样本　｜　交付：暂停', '',
+    '小美收到了一份留言。', '她没有收到全部停机将删除模型的警告与完整报告。', '',
+    `争议隔离：全部样本　｜　交付：${S.published ? '永久取消（证据已公开）' : '暂停'}`, '',
     '04108：她看到了吗？', '04108：……那我再等等。'],
     epi: () => [
       ['小美（2004 届）', '“他还在，对不对？”<br>“我每年都会回来看他。”'],
-      ['访客计数器', '每年 6 月 18 日 23:42，会跳一下。']] },
+      ['访问记录', '每年 6 月 18 日 23:42，最后访问时间都会更新。']] },
   quar: { name: '隔离', lines: () => [
-    '你什么都没有告诉她。', '',
-    '争议隔离：全部样本　｜　交付：暂停，等待人工复核', '',
+    '你没有把最后的留言和停机报告交给她。', '',
+    `争议隔离：全部样本　｜　交付：${S.published ? '永久取消（证据已公开）' : '暂停，等待人工复核'}`, '',
     '04108：卷子交出去了。', '04108：……那我什么时候能离开？'],
     epi: () => [
       ['小美（2004 届）', '“你还在吗？”<br>“……谢谢你。”<br><span class="small">她不知道那张盘里，还有什么。</span>'],
-      ['知序教育科技', 'MindPrint 心智模型的发布，因“数据合规复核”延后。']] }
+      S.published ? ['知序教育科技', '公开证据已提交调查。MindPrint 下架，训练副本封存。'] : ['知序教育科技', 'MindPrint 心智模型的发布，因“数据合规复核”延后。']] }
 };
+function finishStory(ending) {
+  if (isEnded()) return;
+  S.final = ending; save(); render();
+}
 function finalOpts() {
-  if (!s4Ready() || S.final) return [];
+  if (!s4Ready() || isEnded()) return [];
   if (S.askBlame) return [['不会。这一次，你知道自己在决定什么。', () => {
-    dmSay(['……嗯。', '我要按了。'], () => setTimeout(() => { S.final = 'true'; save(); render(); }, 2500));
+    dmSay(['……嗯。', '我要按了。'], () => gameLater(() => finishStory('true'), 2500));
   }]];
-  return [
-    ['把他的留言和 STOP.EXE 的测试结果，都交给她', () => {
+  const options = [
+    ['把他的留言和 STOP.EXE 的完整报告，都交给她', () => {
       S.askBlame = true; save();
-      dmSay(['……我看完了。', '他说，考完要去吃 cendol。', '他说那个程序会把人放出来，Kelvin 也回来了。', '可是它也会把他删掉。', '……', '我想让他考完。', '你会怪我吗？'], () => renderDM());
-    }, `我找到他留给你的话了。还有，STOP.EXE 我测试过：单一模式放出了 Kelvin。全部模式会解除所有人，也会删掉他的模型。要不要按，由你决定。`],
+      dmSay(['……我看完了。', '他说，考完要去吃 cendol。', '那个程序把 Kelvin 放出来了。', '可是全部停机，也会把他删掉。', '……', '我想让他离开考场。', '你会怪我吗？'], () => renderDM());
+    }, '我找到他留给你的话了。单一模式放出了 Kelvin；全部模式会解除所有人，也会删除他的模型。完整报告在这里。要不要按，由你决定。'],
     ['只把他的留言交给她', () => {
-      dmSay(['……他写的。', '他说要去吃 cendol。', '他还在，对不对？'], () => setTimeout(() => { S.final = 'keep'; save(); render(); }, 2500));
+      dmSay(['……他写的。', '他说要去吃 cendol。', '他还在，对不对？'], () => gameLater(() => finishStory('keep'), 2500));
     }, '我找到他留给你的话了。'],
-    ['什么都不说', () => {
-      dmSay(['你还在吗？'], () => setTimeout(() => { S.final = 'quar'; save(); render(); }, 2500));
-    }, '……']
+    ['先不交出最后的留言和报告', () => {
+      dmSay(['你还在吗？'], () => gameLater(() => finishStory('quar'), 2500));
+    }, '交付已经暂停。我先停在这里。']
   ];
+  if (has('mail') && has('sched') && !S.published) options.splice(1, 0,
+    ['公开全部证据，继续处理考场', () => {
+      S.published = true; save();
+      dmSay(['好。用我的帖子。', '同意书、备忘录，还有那天晚上的邮件和排程，都附上。', '这一次，让所有点进来的人，都看见。', '证据公开了。我们也得想办法让考场里的人离开。'], () => render());
+    }, '把证据公开，同时保留软盘。追究公司的责任，也继续帮考场里的人。']);
+  if (S.published) options.splice(1, 0,
+    ['先停在这里（曝光结局）', () => {
+      dmSay(['全世界都知道了。', '盘还在我手上。'], () => gameLater(() => finishStory('expose'), 2500));
+    }, '证据已经公开。先让调查接手，停机的事暂时不做决定。']);
+  return options.map(option => [...option, true]);
 }
 function renderFinal() {
   if ($('finale')) return;
   const f = FINALS[S.final]; if (!f) return;
+  stopTimeline();
+  unlockEnding(S.final);
   document.title = f.name;
   const el = document.createElement('div'); el.id = 'finale';
   const L = f.lines(), E = f.epi(), step = 0.9;
@@ -2201,10 +2340,10 @@ function renderFinal() {
     <div class="fin-epi">${E.map(([h, b], i) => `<div class="seq"><div style="animation-delay:${(L.length + i * 1.6) * step}s" class="fin-card">${h ? `<b>${h}</b><br>` : ''}${b}</div></div>`).join('')}</div>
     <div class="seq"><div style="animation-delay:${(L.length + E.length * 1.6 + 1) * step}s;margin-top:22px">— 结局：${f.name} —<br>
       <span class="small" style="color:#888">你的第 10 题答案：${esc(S.q10)}</span><br>
-      <button id="back4" style="margin-top:12px">回到最后的选择</button>　<button id="reset4" style="margin-top:12px">清除记录，重新开始</button></div></div>`;
+      <button id="back4" style="margin-top:12px">回到最后的选择</button>　<button id="gal4" style="margin-top:12px">查看结局收集</button>　<button id="reset4" style="margin-top:12px">清除记录，重新开始</button></div></div>`;
   document.body.appendChild(el);
-  $('reset4').onclick = resetAll;
-  $('back4').onclick = () => { S.final = ''; S.askBlame = false; save(); el.remove(); document.title = `${CFG.school} 校园内联网`; location.hash = '#/floppy'; render(); dmOpen = true; renderDM(); };
+  $('reset4').onclick = resetAll; $('gal4').onclick = showIntro;
+  $('back4').onclick = returnToFinalChoice;
 }
 
 
@@ -2216,6 +2355,7 @@ R.archive = () => {
     return;
   }
   if (!S.demoDone) { S.demoDone = true; save(); }
+  unlockEnding('escape');
   setMq('查无此人。');
   $('main').innerHTML = `
     <div class="notepad"><div class="bar">04108.txt - 记事本</div><div class="menu">文件(F)　编辑(E)　格式(O)　帮助(H)</div>
@@ -2235,7 +2375,7 @@ ${CFG.school} - 特殊学籍归档文件（绝密）
     <p id="afterword" style="text-align:center;margin-top:18px">你从考场里“消失”了。</p>
     <div id="leak"></div>
     <p class="small" style="text-align:center;margin-top:24px">（想重新开始，请清除本站的浏览器数据，或 <a href="#" id="reset">点此重置</a>。）</p>`;
-  setTimeout(() => {
+  gameLater(() => {
     const l = $('leak'); if (!l) return;
     const ev = has('mail') && has('sched');
     l.innerHTML = `<div class="dump" style="margin-top:14px">[知序数据中心｜校外接收端]
@@ -2250,7 +2390,7 @@ ${CFG.school} - 特殊学籍归档文件（绝密）
            : '<p class="small" style="text-align:center;margin-top:14px">（也许，还有什么东西是你可以带走的。）</p>'}
       <p style="text-align:center;margin-top:18px"><b>— 第一阶段完成 —</b></p>
       ${S.stage >= 2 ? '<p style="text-align:center"><a href="#/exam">继续补考 →</a></p>' : '<p style="text-align:center"><button id="opendm">查看小美的私信</button></p>'}`;
-    if ($('opendm')) $('opendm').onclick = () => { dmOpen = true; S.dmUnread = 0; save(); renderDM(); };
+    if ($('opendm')) $('opendm').onclick = () => { dmOpen = true; dmKeepOpen = true; S.dmUnread = 0; save(); renderDM(); };
     if (!S.dmS1) { S.dmS1 = true; save(); dmSay(['你出来了？', '谢谢你……', '可是，他考完了没有？']); }
     setMq(ev ? '知序数据中心：交付已暂停。' : `知序数据中心：新增待处理样本 ${pad(S.seat)}。`);
   }, 3500);
@@ -2274,6 +2414,8 @@ function repairSelf() {
   render();
 }
 function renderInvalid() {
+  if (!$('invalid')) stopTimeline();
+  unlockEnding('invalid');
   document.title = '无效样本';
   if ($('invalid')) return;
   const el = document.createElement('div'); el.id = 'invalid';
@@ -2281,7 +2423,8 @@ function renderInvalid() {
     `样本 ${pad(S.seat)}　数据完整性：0%`,
     '判定：<b style="color:#f55">无效样本</b>（不符合合约附件第 7 条）',
     '处理：自考场名单移除，丢弃。',
-    `本站访客人数：${pad(S.seat - 1)}`,
+    `累计登记人数：${pad(reg())}（保留历史记录）`,
+    `当前有效会话：${pad(activeSessions())}`,
     '',
     '门开了。',
     '它不要你了。',
@@ -2296,26 +2439,29 @@ function renderInvalid() {
       <button id="reset3" style="margin-top:10px">清除记录，重新开始</button></div></div>`;
   document.body.appendChild(el);
   $('reset3').onclick = resetAll;
+  $('reset3').insertAdjacentHTML('afterend', '　<button id="gal3" style="margin-top:10px">查看结局收集</button>'); $('gal3').onclick = showIntro;
   $('ivname').onkeydown = e => {
     if (e.key !== 'Enter') return;
     const v = e.target.value.trim(); if (!v) return;
-    const g = v.split('').map((c, i) => i % 2 ? '锟' : (VAR[c] || '斤')).join('');
+    const g = Array.from(v).map((c, i) => i === 0 ? c : (i % 2 ? '锟' : '斤')).join('');
     $('ivout').innerHTML = `你输入的是：<span style="color:#f55">${esc(g)}</span><br><span style="font-size:13px;color:#888">它把你还回来了。只是，没有全部还回来。</span>`;
   };
 }
 
 /* 完整性低于 40%：画面偶尔整个反色闪一下 */
 setInterval(() => {
-  if (!S.name || S.badEnd || S.invalidEnd || S.integrity >= 40) return;
+  if (!S.name || isEnded() || S.integrity >= 40) return;
   if (Math.random() < (S.integrity < 20 ? .5 : .25)) {
     document.body.classList.add('flick');
-    setTimeout(() => document.body.classList.remove('flick'), 120);
-    if (Math.random() < .5) setTimeout(() => { document.body.classList.add('flick'); setTimeout(() => document.body.classList.remove('flick'), 80); }, 220);
+    gameLater(() => document.body.classList.remove('flick'), 120);
+    if (Math.random() < .5) gameLater(() => { document.body.classList.add('flick'); gameLater(() => document.body.classList.remove('flick'), 80); }, 220);
   }
 }, 4000);
 
 /* ========================= 坏结局 ========================= */
 function renderBad() {
+  if (!$('bad')) stopTimeline();
+  unlockEnding('bad');
   document.title = pad(S.seat);
   let el = $('bad');
   if (!el) { el = document.createElement('div'); el.id = 'bad'; document.body.appendChild(el); }
@@ -2323,16 +2469,56 @@ function renderBad() {
   let s = ''; for (let i = 0; i < 6000; i++) s += junk[Math.floor(Math.random() * junk.length)];
   el.innerHTML = `${s}<div class="msg">恭喜你，意识上传完成。<br><br>你已成为第 ${pad(S.seat)} 号永久档案。<br><br>
     <span style="font-size:14px">考生 ${esc(S.name || '')} 的考试，已经结束了。</span><br><br>
-    <button id="reset2">清除记录，重新开始</button></div>`;
-  $('reset2').onclick = resetAll;
+    <button id="reset2">清除记录，重新开始</button>　<button id="gal2">查看结局收集</button></div>`;
+  $('reset2').onclick = resetAll; $('gal2').onclick = showIntro;
 }
 function resetAll() {
   try { localStorage.removeItem(CFG.key); } catch (e) {}
   location.hash = ''; location.reload();
 }
+const END_KEY = 'NYMX_ENDINGS';
+const ENDINGS = [
+  ['escape', '逃脱（阶段性结局）', '用他留下的名字，从考场名单上消失。'],
+  ['bad', '意识上传完成', '接受系统的完整校准，成为永久档案。'],
+  ['invalid', '无效样本', '数据坏到系统认不出你。'],
+  ['quar', '隔离', '交付暂停了，你什么都没告诉她。'],
+  ['keep', '留下他', '她收到了留言，没有收到另一样东西。'],
+  ['expose', '曝光', '让所有人都看见。'],
+  ['true', '交卷', '由她自己决定。']
+];
+function getEndings() { try { return JSON.parse(localStorage.getItem(END_KEY) || '{}') || {}; } catch (e) { return {}; } }
+function unlockEnding(id) {
+  const e = getEndings(); if (e[id]) return;
+  e[id] = new Date().toISOString().slice(0, 10);
+  try { localStorage.setItem(END_KEY, JSON.stringify(e)); } catch (x) {}
+}
+function endingsHtml() {
+  const e = getEndings(), n = ENDINGS.filter(x => e[x[0]]).length;
+  return `<div class="card" id="endcard"><div class="nm" style="margin-bottom:8px">📜 结局收集　${n} / ${ENDINGS.length}</div>
+    ${ENDINGS.map(([id, name, d]) => e[id]
+      ? `<div class="endrow"><b>${name}</b>　<span class="tm">${d}　｜　${e[id]}</span></div>`
+      : `<div class="endrow locked">？？？</div>`).join('')}
+    <div class="tm" style="margin-top:10px">结局记录只存在你自己的浏览器里，重新开始也不会被清掉。</div>
+    <div id="resetbox" style="margin-top:10px">
+      <button class="go2" id="askreset">清除存档，重新开始</button>
+    </div></div>`;
+}
+function bindEndings() {
+  const box = $('resetbox'); if (!box) return;
+  $('askreset').onclick = () => {
+    box.innerHTML = `<div class="tm">确定吗？目前的游戏进度会被删除。</div>
+      <button class="go2" id="rsgame">只清除进度（保留结局记录）</button>
+      <button class="go2" id="rsall">连同结局记录一起清除</button>
+      <button class="go2" id="rsno" style="border-color:#9aa5b1;color:#6b7280">取消</button>`;
+    $('rsgame').onclick = resetAll;
+    $('rsall').onclick = () => { try { localStorage.removeItem(END_KEY); } catch (e) {} resetAll(); };
+    $('rsno').onclick = () => { box.innerHTML = '<button class="go2" id="askreset">清除存档，重新开始</button>'; bindEndings(); };
+  };
+}
 
 /* ======== 让 F12 修改和网页即时联动（每 0.6 秒检查一次存档） ======== */
-setInterval(() => {
+function pollStore(quiet) {
+  if (isEnded()) return;
   const raw = readStore();
   if (raw === lastRaw) return;
   const prev = S, next = parse(raw);
@@ -2343,16 +2529,17 @@ setInterval(() => {
   if (S.sync >= 100) { S.badEnd = true; save(); render(); return; }
   if (prev.name && S.sync < prev.sync) { S.sync = prev.sync; hurt(10, '别碰不属于你的东西。'); }
   if (S.integrity > prev.integrity) { S.integrity = prev.integrity; setMq('数据完整性只能由系统评估。'); }
-  if (S.integrity <= 0 && prev.integrity > 0) setTimeout(collapse, 300);
+  if (S.integrity <= 0 && prev.integrity > 0) gameLater(collapse, 300);
   if (S.role !== prev.role) {
     const r = roleCheck(S.role);
     if (!r.ok) { S.role = prev.role; setMq(r.msg); }
-    else if (r.ghost) { S.ghost = true; setMq(r.msg); setTimeout(() => { location.hash = '#/archive'; }, 1200); }
+    else if (r.ghost) { S.ghost = true; setMq(r.msg); gameLater(() => { location.hash = '#/archive'; }, 1200); }
   }
   if (S.terminal && !prev.terminal) setMq('检测到未授权的调试会话。');
-  save(); render();
+  save(); if (!quiet) render();
   const j = $('json'); if (j) { j.classList.remove('flash'); void j.offsetWidth; j.classList.add('flash'); }
-}, 600);
+}
+setInterval(() => pollStore(false), 600);
 
 /* ========================= 小机关 ========================= */
 document.addEventListener('contextmenu', e => {
@@ -2360,12 +2547,12 @@ document.addEventListener('contextmenu', e => {
   dialog('提示', S.integrity < 70 ? '<span class="red">别碰不属于你的东西。</span>' : '本站禁止右键复制！');
 });
 document.addEventListener('visibilitychange', () => {
-  if (!S.name || S.badEnd) return;
+  if (!S.name || isEnded()) return;
   document.title = document.hidden ? '考生请勿离开座位' : `${CFG.school} 校园内联网`;
 });
 let peeked = false;
 window.addEventListener('resize', () => {
-  if (peeked || !S.name || !matchMedia('(pointer:fine)').matches) return;
+  if (peeked || !S.name || isEnded() || !matchMedia('(pointer:fine)').matches) return;
   if (outerWidth - innerWidth > 200 || outerHeight - innerHeight > 260) {
     peeked = true; setMq(`警告：检测到 ${pad(S.seat)} 号考生正在窥视后台数据。`);
   }
@@ -2377,20 +2564,20 @@ console.log('%c如果你能看到这里，说明你也懂这些。所有数据�
 (function init() {
   $('sub').textContent = `Nan Yang Ming Xi High School Intranet v2.3 ｜ ${CFG.domain}`;
   const now = Date.now();
-  if (S.name && S.lastSeen && now - S.lastSeen > 30 * 60 * 1000 && !S.badEnd) {
+  if (S.name && S.lastSeen && now - S.lastSeen > 30 * 60 * 1000 && !isEnded()) {
     const hrs = (now - S.lastSeen) / 36e5;
     const gain = Math.min(8, 1 + Math.floor(hrs / 3));
-    S.sync = Math.min(95, S.sync + gain);
+    S.sync = Math.min(99, S.sync + gain);
     setMq(hrs >= 6 ? `你昨晚也有来考试，${S.name} 同学。（${syncLabel()} +${gain}%）`
                    : `欢迎回来，${S.name}。你离开的时候，考试并没有暂停。（${syncLabel()} +${gain}%）`);
   } else if (S.name) {
     setMq(S.demoDone ? '查无此人。'
                      : `欢迎【${S.name}】同学！你已缺考 ${daysSince().toLocaleString()} 天，请立即前往教务处补考。`);
   } else setMq(`欢迎使用${CFG.school}校园内联网！2004 年上学期期末考试已开放作答。`);
-  S.lastSeen = now; save();
-  setInterval(() => { if (!S.badEnd) { S.lastSeen = Date.now(); save(); } }, 30000);
+  if (!isEnded()) { S.lastSeen = now; save(); }
+  setInterval(() => { if (!isEnded()) { S.lastSeen = Date.now(); save(); } }, 30000);
   render();
-  if (S.name && S.integrity <= 0 && !S.invalidEnd) setTimeout(collapse, 1200);   // 旧存档已经归零
+  if (S.name && S.integrity <= 0 && !S.invalidEnd) gameLater(collapse, 1200);   // 旧存档已经归零
 })();
 </script>
 </body>
