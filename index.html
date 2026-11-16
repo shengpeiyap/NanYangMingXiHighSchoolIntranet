@@ -175,24 +175,32 @@ const daysSince = () => Math.floor((Date.now() - new Date(2004, 5, 18)) / 864e5)
 const nowStr = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${d.toTimeString().slice(0,5)}`; };
 const b64 = s => { try { return btoa(s); } catch (e) { return ''; } };
 function setMq(t) { mqText = t; $('mq').textContent = t; }
-function addSync(n) { S.sync = Math.min(99, S.sync + n); }
+const syncLabel = () => S.sync >= 25 ? '记忆同步率' : '考试进度';
+function addSync(n) {
+  const before = S.sync;
+  S.sync = Math.min(99, S.sync + n);
+  if (before < 25 && S.sync >= 25) setTimeout(() => {
+    setMq('系统提示：“考试进度”已更名为“记忆同步率”。');
+    dialog('系统通知', '为配合考场协议，<br>“考试进度”即日起更名为<span class="red">“记忆同步率”</span>。<br><br><span class="small">你浏览过的每一份资料，都已计入。</span>');
+  }, 600);
+}
 
 /* 线索：每记下一条，同步率就上升 —— 你知道得越多，它就越认得你 */
 const CLUES = [
-  ['admin',  'chen_admin 已于 2004-06-18 23:42 注销。分机 213 是陈老师的后门密码。'],
-  ['white',  '公告里藏着白字：子轩的学号是 04108。老陈常在计算器上算“学号 × 分机号”。'],
-  ['dump',   '计算器溢出，吐出一段 Base64 编码的调试指令。'],
-  ['term',   '还原指令后打开了系统调试台。这个网页的存档，就在浏览器的 localStorage 里。'],
-  ['q4',     '陈老师倒下时，手里的字条写着：别拔电源。'],
-  ['post3',  '陈老师的残帖只能打印出来看：“只有一个名字它不敢删，你已经见过了。”'],
-  ['bin',    '留言板的页码从 0 开始。回收站里有子轩死前一分钟的留言。'],
-  ['lin',    '子轩的个人主页：他有心脏病，是脑电头环的受试者，陈老师给了他维护员账号。'],
-  ['photo',  '电脑社合照拍于 2004-06-18 22:40。调亮以后，黑板上写着 SAMPLE 0001 / 5000。'],
-  ['counter','首页的访客计数器是子轩写的，读的其实是“采集程序”的样本数。你是第 4959 份。'],
-  ['guess',  '子轩的 GUESS.EXE 有秘密模式：他在采集程序里留了一个不会被删的名字。'],
-  ['chen',   '陈老师的博客：学校与“智源教育科技”合作，公司赞助电脑室，换取学生的脑波数据。'],
-  ['secret', '登录陈老师的博客：《给子轩》——他用自己的脑波当桥，想让系统“相信”它就是子轩。'],
-  ['quota',  '陈老师的草稿：合约要求收集不少于 5000 份样本，未达标前采集程序不得停止。']
+  ['admin',  '「账号 chen_admin 已于 2004-06-18 23:42 注销。」　—— 登录页（我输入的密码是 213）'],
+  ['white',  '「学号 04108 还在考场名单里一闪一闪……子轩的学号，乘以他自己的分机号。」　—— 公告栏，看不见的那一段'],
+  ['dump',   '「DEBUG_PAYLOAD: T1BFTl9URVJNSU5BTCAtLXVz……」　—— 计算器溢出时的画面'],
+  ['term',   '「已挂载会话：localStorage[\"NYMX_SESSION\"]」　—— 系统调试台'],
+  ['q4',     '「手中紧握一张写着【别拔电源】的字条」　—— 期末考试第 4 题'],
+  ['post3',  '「别让数字到 100　只有一个名字它不敢删　你已经见过了」　—— 留言板 3 楼，打印出来的'],
+  ['bin',    '「老师，机房好冷。灯为什么一直亮着？」　—— 回收站，林子轩，2004-06-18 23:41'],
+  ['lin',    '「最近的烦恼：心脏不太听话。」　—— 子轩的个人主页'],
+  ['photo',  '「SAMPLE 0001 / 5000」　—— 电脑社合照，黑板上'],
+  ['counter','「n = Application(\"sample_count\")」　—— COUNTER.ASP，子轩写的'],
+  ['guess',  '「那个名字是：GHOST_ 加上我的学号。」　—— GUESS.EXE 的秘密模式'],
+  ['chen',   '「公司赞助三十台新电脑，条件是……记录学生的专注度和答题习惯。」　—— 陈老师的博客'],
+  ['secret', '「今晚我会把头环接上主机，用我自己的脑波当桥。」　—— 陈老师的私人文章《给子轩》'],
+  ['quota',  '「有效样本须对应独立身份；重复测量不得计入验收数量。」　—— 合约附件第 7 条']
 ];
 function toast(t) {
   const d = document.createElement('div'); d.className = 'toast'; d.innerHTML = t;
@@ -201,7 +209,8 @@ function toast(t) {
 function clue(id, n = 2) {
   if (S.clues.includes(id)) return;
   S.clues.push(id); addSync(n); save();
-  toast(`📝 草稿纸已更新（${S.clues.length}/${CLUES.length}）　<span class="red">同步率 +${n}%</span>`);
+  if (S.name) renderNav();
+  toast(`📝 草稿纸已更新（${S.clues.length}/${CLUES.length}）　<span class="red">${syncLabel()} +${n}%</span>`);
 }
 function hurt(n, msg) {
   S.integrity = Math.max(10, S.integrity - n);
@@ -242,7 +251,7 @@ function route() {
 function renderNav() {
   if (!S.name) { $('nav').innerHTML = '<span class="small">尚未登录。访客请输入姓名进入考场。</span>'; return; }
   $('nav').innerHTML = `
-    <span class="who">考生：<b>${esc(S.name)}</b>（座号 ${pad(S.seat)}）｜身份：${esc(S.role)}｜记忆同步率：<b class="red">${S.sync}%</b>｜数据完整性：${S.integrity}%</span>
+    <span class="who">考生：<b>${esc(S.name)}</b>（座号 ${pad(S.seat)}）｜身份：${esc(S.role)}｜${syncLabel()}：<b class="red">${S.sync}%</b>｜数据完整性：${S.integrity}%</span>
     <a href="#/home">公告栏</a><a href="#/exam">期末考试</a><a href="#/board">留言板</a><a href="#/tools">工具箱</a>
     ${S.terminal ? '<a href="#/terminal" style="color:#c00">系统调试台</a>' : ''}
     <a href="#/notes">草稿纸</a><a href="#/archive">机密档案</a><a href="#" id="logout">登出</a>`;
@@ -335,7 +344,7 @@ R.home = () => {
       <span class="red">补考通知：考生 ${esc(S.name)}，你已缺考 ${daysSince().toLocaleString()} 天。请尽快完成【期末考试】。</span></div>
     <div class="post"><div class="meta">2004-06-18 23:59　｜　发布：系统自动</div>
       请仍在考场内的考生立即停笔。</div>
-    <div class="post"><div class="meta">2004-06-14　｜　发布：教务处</div>
+    <div class="post"><div class="meta">2004-06-14　｜　发布：教务处　｜　原公告最后修改时间：<span class="red">无法读取</span></div>
       <b>《2004 年上学期期末考试考场安排》</b><br>
       各位同学：本学期期末考试定于 6 月 18 日上午 8:00 准时开始。请各位考生登录内网核对准考证号，严禁在机房内使用自带软盘或修改系统时间。<br>——${CFG.school}教务处
       <p class="white">他烧到三十九度，还是坚持留在机房，要把最后一套模拟题传上去。昨晚雷雨，旧实验楼跳闸，等我们找到他的时候，已经叫不醒了。医生说，他可能醒不过来了。
@@ -390,7 +399,7 @@ function q4submit(v) {
   if (v === '别拔电源' || v === '別拔電源') {
     S.q4 = true; save(); clue('q4', 15);
     setMq('留言板 3 楼的数据开始恢复。');
-    dialog('批改结果', '答案正确。<br><br>你读取了 chen_admin 留在考场里的最后一段记忆。<br><span class="red">同步率 +15%。与这段记忆有关的数据，正在恢复……</span>', render);
+    dialog('批改结果', '答案正确。<br><br><span class="red">……你怎么会知道？那天晚上，你并不在场。</span>', render);
   } else {
     hurt(10, '你不记得。你根本不在那里。'); save();
     dialog('批改结果', `<span class="red">答案错误。数据完整性 -10%</span><br>当前完整性：${S.integrity}%`, render);
@@ -444,13 +453,13 @@ R.board = () => {
     h = `<h3>💬 校园留言板</h3>
       <div class="print-only small">打印时间：${nowStr()}　打印人：${pad(S.seat)} 号考生</div>
       ${post(1, '小美', '2004-06-16 21:03', '有人知道历史科考哪几课吗？<br>子轩你烧退了没有？不要再熬夜弄电脑了啦。')}
-      ${post(2, '林子轩', '2004-06-17 19:40', '今晚我留在机房，把最后一套模拟题传上去。陈老师说系统星期五一定要上线。<br>我的学号是 04108，大家考完帮我看看成绩有没有进步哈哈。<br>电脑室的空调又坏了，好热。<br><span class="small">──────────<br>电脑社社长 林子轩｜我的个人主页：<a href="#/~lin">${CFG.domain}/~lin</a></span>')}
+      ${post(2, '林子轩', '2004-06-17 19:40', `今晚我留在机房，把最后一套模拟题传上去。陈老师说系统星期五一定要上线。<br>我的学号是 04108，大家考完帮我看看成绩有没有进步哈哈。<br>电脑室的空调又坏了，好热。<br><span class="small">──────────<br>电脑社社长 林子轩｜我的个人主页：<a href="#/~lin">${CFG.domain}/~lin</a></span>`)}
       <div class="post">
         <div class="screen-only"><div class="meta">3 楼　｜　匿名　｜　2004-06-19 02:14</div>
           <span class="small">[该帖违反本校《电脑室使用规则》第 7 条，已被管理员删除。]</span>
           ${S.sync >= 20
-            ? `<div class="restored">⚠ 此帖已部分恢复。原文无法在屏幕上显示，仅支持打印查看。<br>你的同步率已经高到能读取陈老师的记忆了。这不是好消息。<br><button onclick="window.print()">🖨 打印本页</button></div>`
-            : `<div class="small red">[数据损坏] 此帖存放在考生记忆同步区，记忆同步率须达 20% 才能读取（当前 ${S.sync}%）。</div>`}</div>
+            ? `<div class="restored">⚠ 此帖已部分恢复。原文无法在屏幕上显示，仅支持打印查看。<br><button onclick="window.print()">🖨 打印本页</button>　<button onclick="printPreview()">🔍 打印预览</button></div>`
+            : `<div class="small red">[数据损坏] 此帖暂时无法读取。（读取条件：${syncLabel()} ≥ 20%，当前 ${S.sync}%）</div>`}</div>
         <div class="print-only">${S.sync >= 20 ? `<div class="meta">3 楼　｜　chen_admin（已注销）　｜　2004-06-19 02:14</div>
           子轩不是在考试　是它在考<br>人数不够　它就去外面找<br>我删不掉自己　权限没了<br>别让数字到 100<br>只有一个名字它不敢删　你已经见过了`
           : '<div class="meta">3 楼</div>[该内容无法打印]'}</div>
@@ -555,7 +564,7 @@ function roleCheck(v) {
   if (v === 'student') return { ok: true, msg: '身份已设为 student。' };
   if (v === 'chen_admin') return { ok: false, msg: '拒绝：账号 chen_admin 已于 2004-06-18 23:42 注销。' };
   if (b64(v) === ENC.ghost) {
-    if (!S.q4) return { ok: false, msg: '白名单校验失败：记忆同步率不足（请先完成第 4 题）。' };
+    if (!S.q4) return { ok: false, msg: '白名单校验失败：' + syncLabel() + '不足（请先完成第 4 题）。' };
     return { ok: true, ghost: true, msg: '……白名单校验通过。欢迎回来，子轩。' };
   }
   return { ok: false, msg: '未知身份：' + v };
@@ -616,7 +625,6 @@ R.notes = () => {
   if (got.length >= 5) h += `<div class="hand">别再往下查了。你知道得越多，它就越认得你。</div>`;
   if (S.clues.includes('secret')) h += `<div class="hand">谢谢你还记得我。可是小美的那张软盘，到现在还没有人打开过。　——子轩</div>`;
   h += `</div>`;
-  if (got.length >= 5) h += `<p class="small">（最后几行字迹不是你的。）</p>`;
   $('main').innerHTML = h;
 };
 
@@ -718,7 +726,7 @@ R['~lin'] = () => {
 
     <h4>【相册】</h4>
     <canvas id="photo" width="480" height="320" style="max-width:100%;border:4px solid #fff" title="IMG_0618.JPG｜2004-06-18 22:40"></canvas><br>
-    <span class="small" style="color:#9c9">电脑社合照（最后一张）</span><br>
+    <span class="small" style="color:#9c9">电脑社合照（最后一张）　上传者：林子轩　上传时间：2004-06-18 22:41</span><br>
     <button id="pprop">查看属性</button>　图片增强（亮度）：<input id="pbr" type="range" min="1" max="8" step="0.5" value="1" style="vertical-align:middle">
 
     <h4>【我的周记】</h4>
@@ -727,7 +735,7 @@ R['~lin'] = () => {
     <div class="gb"><b>2004-05-27</b>　头环戴了快三个月。陈老师说，服务器里存着我每一次答题的脑波，系统已经能猜到我下一题会选什么了。有点毛。</div>
     <div class="gb"><b>2004-06-05</b>　陈老师偷偷给了我维护员账号，叫我帮忙把题库传上去。他还以为我不知道他的后门密码是分机号咧。<br>
       还有，他博客的密码提示问题是“我最重要的一天”，答案是他女儿的生日 0918，全电脑社都知道。我没登进去看，真的。</div>
-    <div class="gb"><b>2004-06-12</b>　我在服务器日志里看到，采集程序每天半夜都会连到校外一个叫 zhiyuan 的地址。问陈老师，他说不要管。<br>我决定自己处理。</div>
+    <div class="gb"><b>2004-06-12</b>　我在服务器日志里看到，采集程序每天半夜都会连到校外一个叫 zhixu 的地址。问陈老师，他说不要管。<br>我决定自己处理。</div>
     <div class="gb"><b>2004-06-17</b>　今晚留在机房传最后一套题。外面在打雷。<br>如果毕业考考得好，我就把那张软盘交给小美。</div>
 
     <h4>【友情链接】</h4>
@@ -738,7 +746,7 @@ R['~lin'] = () => {
     <div class="gb">阿杰｜2004-06-17｜社长，第三台电脑又自己开机了。</div>
     <div class="gb">小美｜2004-06-19｜子轩，你回我一下好不好。</div>
     <div class="gb">004102 号访客｜2021-11-03｜原来他真的存在过。</div>
-    <div class="gb">${pad(S.seat)} 号访客｜${nowStr()}｜<span style="color:#f55">你也来了。</span>　<span class="small">（这条留言不是你写的）</span></div>`}
+    <div class="gb">${pad(S.seat)} 号访客｜${nowStr()}｜<span style="color:#f55">你也来了。</span></div>`}
   </div>`;
 
   if ($('dosin')) {
@@ -813,11 +821,11 @@ R['~chen'] = () => {
         <span class="small">—— 2004-06-18 22:57</span>　<span class="small red">[本文最后修改时间：${nowStr()}]</span></div>
       <h4 style="color:#663;margin:14px 0 0">📁 草稿箱（4）</h4>
       <div class="entry"><b>[草稿] 2003-11-02　要不要回去</b><br>
-        前公司“智源教育科技”的郑总来学校找我。他们想在中学做脑电试点，赞助一整间新电脑室。<br>
+        前公司“知序教育科技”的郑总来学校找我。他们想在中学做脑电试点，赞助一整间新电脑室。<br>
         我当年离职，就是因为他们拿用户数据从来不手软。可是学校的电脑十年没换过了，孩子们连软盘都要排队用。</div>
       <div class="entry"><b>[草稿] 2004-03-20　合约附件第 7 条</b><br>
-        今天才看懂合约附件：试点须收集“<b>不少于 5000 份有效样本</b>”，未达标前，采集程序不得停止。<br>
-        全校才八百个学生，哪来的五千份？我打电话问郑总，他笑着说：“系统会自己想办法。”</div>
+        今天才看懂合约附件第 7 条：试点须收集“<b>不少于 5000 份有效样本</b>”；<b>有效样本须对应独立身份，重复测量不得计入验收数量</b>；未达标前，采集程序不得停止。<br>
+        全校才八百个学生，每个人测一百次，也只算八百份。我打电话问郑总，他笑着说：“系统会自己想办法。”</div>
       <div class="entry"><b>[草稿] 2004-06-12　子轩发现了</b><br>
         子轩翻了服务器日志，问我为什么采集程序每天半夜都连到校外。我答不出来。<br>
         他说他会“处理”。我不知道他做了什么。我只知道，我应该在三个月前就拒绝。</div>
@@ -825,12 +833,14 @@ R['~chen'] = () => {
         <span class="glitch">我在里面。好冷。</span><br>计数器跳了。子轩是第 1 份。<br>它还在数。它要五千份。</div>
       <p style="text-align:right"><a href="#" id="blogout" class="small">登出</a></p>`;
   } else {
-    body = `<div class="entry"><b>2004-02-16　「心智评估系统」立项</b><br>
-        学校和智源教育科技签了合作，成为“智慧学校”试点。公司赞助三十台新电脑，条件是在模拟考时用简易脑电头环，记录学生的专注度和答题习惯。校长很高兴，说这是全州第一个。</div>
+    body = `<div class="entry"><b>2004-02-16　「知序心智评估系统」立项</b><br>
+        学校和知序教育科技签了合作，成为“智慧学校”试点。宣传册的封面印着：“让每一份潜能，都被看见。”<br>公司赞助三十台新电脑，条件是在模拟考时用简易脑电头环，记录学生的专注度和答题习惯。校长很高兴，说这是全州第一个。</div>
       <div class="entry"><b>2004-04-21　保密</b><br>
         子轩今天告诉我，他有先天性心脏病，医生要他尽快动手术。他求我别告诉别人，他想先考完毕业考。我答应了。我不知道这样做对不对。</div>
       <div class="entry"><b>2004-06-05　违规</b><br>
         我违反规定，给了子轩维护员账号。全校只有他看得懂我的代码，题库交给他传，我比较放心。</div>
+      <div class="entry"><b>2004-06-18 07:55　上线</b><br>
+        系统准时上线了。<br>子轩昨晚在机房触电，现在在中央医院加护病房。考场名单上他的位子，我没有删。</div>
       <div class="entry"><span class="small">另有 1 篇私人文章，仅作者登录后可见。</span></div>`;
   }
 
@@ -860,6 +870,21 @@ R['~chen'] = () => {
   }
 };
 
+/* 游戏内打印预览：手机玩家也能看到打印出来的内容 */
+function printPreview() {
+  clue('post3');
+  const d = document.createElement('div');
+  d.className = 'dlg-mask';
+  d.innerHTML = `<div class="dlg" style="width:min(520px,94vw)"><div class="dlg-t">打印预览<span>×</span></div>
+    <div style="background:#808080;padding:14px"><div style="background:#fff;padding:22px 26px;min-height:220px;font-size:13px;line-height:1.9;box-shadow:3px 3px 0 #333">
+      <div class="small">${CFG.school} 校园留言板　｜　打印时间：${nowStr()}　｜　打印人：${pad(S.seat)} 号考生</div><hr>
+      <div class="meta">3 楼　｜　chen_admin（已注销）　｜　2004-06-19 02:14</div>
+      子轩不是在考试　是它在考<br>人数不够　它就去外面找<br>我删不掉自己　权限没了<br>别让数字到 100<br>只有一个名字它不敢删　你已经见过了
+    </div></div><div class="dlg-f" style="padding-top:10px"><button>关闭</button></div></div>`;
+  d.querySelector('button').onclick = d.querySelector('.dlg-t span').onclick = () => d.remove();
+  document.body.appendChild(d);
+}
+
 /* 在公告栏选中白字时，记下线索 */
 document.addEventListener('selectionchange', () => {
   if (!S.name || route() !== 'home') return;
@@ -878,7 +903,7 @@ R.archive = () => {
     return;
   }
   if (!S.demoDone) { S.demoDone = true; save(); }
-  setMq(`欢迎明天继续回来参加考试，${pad(S.seat)} 号同学。`);
+  setMq('查无此人。');
   $('main').innerHTML = `
     <div class="notepad"><div class="bar">04108.txt - 记事本</div><div class="menu">文件(F)　编辑(E)　格式(O)　帮助(H)</div>
 <pre>========================================
@@ -886,17 +911,26 @@ ${CFG.school} - 特殊学籍归档文件（绝密）
 档案编号：04108 ｜ 姓名：林子轩
 临床状态：2004-06-18 23:42 确认脑死亡
 内网状态：活跃（寄生于主进程 nymx_exam.exe）
-========================================
-[系统日志追加 - ${nowStr()} 实时记录]
-当前替考宿主：${pad(S.seat)} 号访客（${esc(S.name)}）
-意识同步进度：${S.sync}%
-备注：宿主已成功访问底层档案。
-由于考场协议已激活，即使关闭本网页，服务器
-仍将在后台持续校准您的脑波频率。
+当前替考宿主：（空缺）
+========================================</pre></div>
+    <div class="notepad" style="margin-top:12px"><div class="bar">考场名单查询 - nymx_exam.exe</div>
+<pre>查询考号：${pad(S.seat)}
+查询结果：<b>查无此人。</b>
+当前会话：<b>已注销。</b>
 
-欢迎明天继续回来参加考试，${pad(S.seat)} 号同学。</pre></div>
-    <p style="text-align:center;margin-top:24px"><b>— Demo 阶段一完成 —</b></p>
-    <p class="small" style="text-align:center">（想重新开始，请清除本站的浏览器数据，或 <a href="#" id="reset">点此重置</a>。）</p>`;
+考场门锁：已开启</pre></div>
+    <p id="afterword" style="text-align:center;margin-top:18px">你从考场里“消失”了。</p>
+    <div id="leak"></div>
+    <p class="small" style="text-align:center;margin-top:24px">（想重新开始，请清除本站的浏览器数据，或 <a href="#" id="reset">点此重置</a>。）</p>`;
+  setTimeout(() => {
+    const l = $('leak'); if (!l) return;
+    l.innerHTML = `<div class="dump" style="margin-top:14px">[知序数据中心｜校外接收端]
+节点 OLD-SRV01 回传一条记录……
+新增待处理样本：${pad(S.seat)}　（来源：考场名单注销）
+状态：<span class="cn">等待交付</span></div>
+      <p style="text-align:center;margin-top:18px"><b>— Demo 阶段一完成 —</b></p>`;
+    setMq(`知序数据中心：新增待处理样本 ${pad(S.seat)}。`);
+  }, 3500);
   $('reset').onclick = e => { e.preventDefault(); resetAll(); };
 };
 
@@ -966,10 +1000,10 @@ console.log('%c如果你能看到这里，说明你也懂这些。所有数据�
     const hrs = (now - S.lastSeen) / 36e5;
     const gain = Math.min(8, 1 + Math.floor(hrs / 3));
     S.sync = Math.min(95, S.sync + gain);
-    setMq(hrs >= 6 ? `你昨晚也有来考试，${S.name} 同学。（同步率 +${gain}%）`
-                   : `欢迎回来，${S.name}。你离开的时候，考试并没有暂停。（同步率 +${gain}%）`);
+    setMq(hrs >= 6 ? `你昨晚也有来考试，${S.name} 同学。（${syncLabel()} +${gain}%）`
+                   : `欢迎回来，${S.name}。你离开的时候，考试并没有暂停。（${syncLabel()} +${gain}%）`);
   } else if (S.name) {
-    setMq(S.demoDone ? `欢迎明天继续回来参加考试，${pad(S.seat)} 号同学。`
+    setMq(S.demoDone ? '查无此人。'
                      : `欢迎【${S.name}】同学！你已缺考 ${daysSince().toLocaleString()} 天，请立即前往教务处补考。`);
   } else setMq(`欢迎使用${CFG.school}校园内联网！2004 年上学期期末考试已开放作答。`);
   S.lastSeen = now; save();
