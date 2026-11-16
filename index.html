@@ -126,6 +126,7 @@
   #intro p { line-height:1.85; margin:0 0 10px; font-size:15px; }
   #intro .go { display:block; width:100%; padding:12px; margin-top:6px; border:none; border-radius:8px; background:#2563eb; color:#fff; font-size:15px; cursor:pointer; font-family:inherit; }
   #intro .rep p { font-size:14px; margin:0; }
+  #intro .edit { background:#fef3c7; color:#92400e; border-radius:8px; padding:8px 12px; font-size:14px; margin-bottom:10px; }
   #intro .note { font-size:12px; color:#9aa5b1; text-align:center; margin:16px 0 30px; }
   .goal { border:1px dashed #a66; background:#fff6f0; padding:6px 10px; margin:0 0 10px; font-size:13px; }
   .seatwrap { display:flex; gap:12px; flex-wrap:wrap; margin:8px 0; }
@@ -163,6 +164,48 @@
   details.qd summary { cursor:pointer; padding:4px 10px; color:#060; font-size:13px; }
   details.qd .q { margin:4px 8px 8px; background:#fff; }
   #cur { border:2px solid #0a246a; }
+  #site { position:fixed; inset:0; z-index:90; background:#e5e7eb; overflow:auto; font-family:-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif; color:#111827; }
+  .z-browser { max-width:1100px; margin:16px auto; display:grid; grid-template-columns:1fr 300px; gap:14px; padding:0 12px; }
+  @media (max-width:820px) { .z-browser { grid-template-columns:1fr; } }
+  .z-bar { grid-column:1/-1; background:#fff; border-radius:10px; padding:8px 12px; display:flex; gap:12px; align-items:center; box-shadow:0 1px 3px rgba(0,0,0,.08); }
+  .z-back { color:#2563eb; text-decoration:none; font-size:14px; white-space:nowrap; }
+  .z-url { flex:1; background:#f3f4f6; border-radius:999px; padding:5px 14px; font-size:13px; color:#4b5563; }
+  .z-main, .z-ev { background:#fff; border-radius:12px; box-shadow:0 1px 3px rgba(0,0,0,.08); overflow:hidden; }
+  .z-nav { display:flex; gap:18px; align-items:center; padding:14px 22px; border-bottom:1px solid #f0f0f0; }
+  .z-nav a { color:#374151; text-decoration:none; font-size:14px; } .z-logo { font-size:18px; letter-spacing:2px; margin-right:auto; color:#0f766e; }
+  .z-body { padding:22px; line-height:1.8; min-height:320px; }
+  .z-hero { background:linear-gradient(135deg,#0f766e,#14b8a6); color:#fff; border-radius:14px; padding:36px 28px; }
+  .z-hero h1 { font-size:30px; margin:8px 0; } .z-tag { font-size:13px; opacity:.85; letter-spacing:2px; }
+  .z-count { display:inline-block; margin-top:12px; background:rgba(255,255,255,.18); border-radius:999px; padding:6px 16px; } .z-count b { font-size:22px; }
+  .z-cards { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:16px; } .z-cards div { background:#f0fdfa; border-radius:12px; padding:14px; text-align:center; color:#115e59; }
+  .z-tl div { border-left:3px solid #14b8a6; padding:4px 12px; margin:6px 0; } .z-news { border-bottom:1px solid #f0f0f0; padding:8px 0; }
+  .z-small { font-size:12px; color:#6b7280; } .z-foot { padding:12px 22px; border-top:1px solid #f0f0f0; font-size:12px; color:#6b7280; } .z-foot a { color:#2563eb; }
+  .z-pre { background:#0b1020; color:#a7f3d0; padding:14px; border-radius:8px; font-size:13px; white-space:pre-wrap; }
+  .z-shelf input { border:1px solid #d1d5db; border-radius:6px; padding:4px 8px; font-family:inherit; }
+  .z-shelf button, .z-ev button { border:1px solid #2563eb; background:#fff; color:#2563eb; border-radius:6px; padding:4px 10px; cursor:pointer; font-family:inherit; }
+  .z-snap { border:1px solid #d6d3c4; margin:12px 0; background:#fffef8; font-family:"SimSun","Times New Roman",serif; }
+  .z-snaphead { background:#7c2d12; color:#fff; font-size:12px; padding:4px 10px; font-family:-apple-system,"Microsoft YaHei",sans-serif; }
+  .z-snapbody { padding:10px 14px; } .z-snapbody h4 { color:#003399; margin:4px 0 8px; }
+  .z-keep { font-size:12px !important; padding:2px 8px !important; } .z-kept { font-size:12px; color:#059669; }
+  .z-memo { border:1px dashed #999; background:#fff; padding:8px 12px; margin:8px 0; }
+  .z-photo { width:220px; height:130px; background:repeating-linear-gradient(45deg,#ddd 0 8px,#eee 8px 16px); display:flex; align-items:center; justify-content:center; color:#888; }
+  .z-del { color:#b91c1c; text-decoration:line-through; } .z-add { color:#047857; }
+  .z-ev { padding:14px; align-self:start; position:sticky; top:12px; } .z-evh { font-weight:600; margin-bottom:6px; }
+  .z-evi { display:block; font-size:13px; line-height:1.5; margin:6px 0; padding:6px 8px; background:#f9fafb; border-radius:8px; cursor:pointer; }
+  .z-conc { font-size:13px; background:#ecfdf5; color:#065f46; border-radius:8px; padding:8px 10px; margin:6px 0; }
+  .z-dlbtn { font-size:12px; border:1px solid #9ca3af; background:#fff; color:#4b5563; border-radius:6px; padding:2px 8px; cursor:pointer; font-family:inherit; }
+  .z-search { margin-left:6px; border:1px solid #d1d5db; border-radius:999px; padding:5px 12px; font-family:inherit; font-size:13px; width:140px; }
+  .z-try { display:inline-block; margin-top:12px; background:#fff; color:#0f766e; border-radius:999px; padding:6px 16px; text-decoration:none; font-weight:600; }
+  .z-res { border-bottom:1px solid #f0f0f0; padding:10px 0; } .z-rt { color:#1d4ed8; font-weight:600; margin:2px 0; }
+  .z-demo { border:1px solid #e5e7eb; border-radius:12px; overflow:hidden; }
+  .z-dlog { height:280px; overflow:auto; padding:12px; background:#f9fafb; }
+  .z-dm { margin:6px 0; display:flex; } .z-dm span { background:#e0f2f1; color:#134e4a; border-radius:12px; padding:7px 11px; max-width:80%; line-height:1.6; }
+  .z-dm.me { justify-content:flex-end; } .z-dm.me span { background:#0f766e; color:#fff; }
+  .z-dq { padding:8px; display:flex; flex-wrap:wrap; gap:6px; border-top:1px solid #f0f0f0; }
+  .z-dq button { border:1px solid #14b8a6; background:#fff; color:#0f766e; border-radius:999px; padding:4px 12px; cursor:pointer; font-family:inherit; }
+  .z-din { display:flex; gap:6px; padding:8px; border-top:1px solid #f0f0f0; } .z-din input { flex:1; border:1px solid #d1d5db; border-radius:8px; padding:6px 10px; font-family:inherit; }
+  .z-din button { border:none; background:#0f766e; color:#fff; border-radius:8px; padding:6px 14px; cursor:pointer; font-family:inherit; }
+  .z-hyp { font-size:13px; background:#fffbeb; color:#92400e; border-radius:8px; padding:8px 10px; margin:6px 0; }
   .restored { border:2px dashed #c00; padding:6px; margin-top:6px; color:#c00; }
 
   /* 坏结局 */
@@ -216,7 +259,7 @@ const DEFAULT = {
   name: null, seat: SEAT, role: 'student',
   sync: 0, integrity: 100,
   exam: [false, false, false], q4: false,
-  dumpSeen: false, binSeen: false, clues: [], blogLogin: false, q4wrong: 0, opened: [], chatOpen: false, chatLog: [], chatAsked: [], chatCreep: false, chatCount: {}, invalidEnd: false, repaired: 0, introSeen: false, stage: 1, split: false, dm: [], dmUnread: 0, dmS1: false, s2told: false, dmHello: false, q5: false, q6: false, q7: false, q8: false, q9: false, s2done: false, noteOrder: [], q9pick: -1, fakeDate: 0, fakeSetAt: 0, exitTries: 0, exitLin: false, adminSeen: false, realClock: false, boardSeen: false, terminal: false, ghost: false, demoDone: false, badEnd: false,
+  dumpSeen: false, binSeen: false, clues: [], blogLogin: false, q4wrong: 0, opened: [], chatOpen: false, chatLog: [], chatAsked: [], chatCreep: false, chatCount: {}, invalidEnd: false, repaired: 0, introSeen: false, stage: 1, split: false, dm: [], dmUnread: 0, dmS1: false, s2told: false, dmHello: false, q5: false, q6: false, q7: false, q8: false, q9: false, s2done: false, noteOrder: [], q9pick: -1, s3start: false, ev: [], conc: [], statusSeen: false, reg: 0, regBump1: false, s3done: false, s3promise: false, fakeDate: 0, fakeSetAt: 0, exitTries: 0, exitLin: false, adminSeen: false, realClock: false, boardSeen: false, terminal: false, ghost: false, demoDone: false, badEnd: false,
   lastSeen: 0, visits: 0
 };
 
@@ -229,7 +272,7 @@ function parse(raw) {
   const s = Object.assign({}, DEFAULT, o);
   if (!Array.isArray(s.exam)) s.exam = [false, false, false];
   if (s.name && !s.introSeen) s.introSeen = true;   // 旧存档：已经在里面的人，不再补看开场帖
-  for (const k of ['clues', 'opened', 'chatLog', 'chatAsked', 'noteOrder', 'dm']) if (!Array.isArray(s[k])) s[k] = [];
+  for (const k of ['clues', 'opened', 'chatLog', 'chatAsked', 'noteOrder', 'dm', 'ev', 'conc']) if (!Array.isArray(s[k])) s[k] = [];
   if (!s.chatCount || typeof s.chatCount !== 'object') s.chatCount = {};
   s.sync = Number(s.sync) || 0;
   s.integrity = Number(s.integrity); if (isNaN(s.integrity)) s.integrity = 100;
@@ -290,7 +333,16 @@ const CLUES = [
   ['rec',    '「▬ • • •　｜　• ▬　｜　▬ • ▬ •　｜　▬ • ▬」　—— PC-03 恢复的录音，结尾的蜂鸣'],
   ['note2',  '「06-18 22:41　去看它在 PC-03 上做什么。」　—— 陈老师字条的背面'],
   ['replay', '「爸爸说，考完这次就不用再来了。」　—— PC-03 屏幕回放，22:41，账号 lin04108'],
-  ['floppy', '「所有会话一起断了。我的模型目录也不见了。正式服务器没试过。」　—— 软盘镜像，NOTE_0612.TXT']
+  ['floppy', '「所有会话一起断了。我的模型目录也不见了。正式服务器没试过。」　—— 软盘镜像，NOTE_0612.TXT'],
+  ['c1',     '「越权：同意书只授权学习测评，资料却被做成了基础模型。」　—— 证据比对'],
+  ['c2',     '「销毁声明不实：同一份模型在 2002 年换了名字继续使用。」　—— 证据比对'],
+  ['c3',     '「BASE-12 和 MP-BASE 的校验值一模一样。」　—— 证据比对'],
+  ['c4',     '「腕带写着受试者 0007。」　—— 五周年活动照片，放大'],
+  ['c5',     '「已阅，维持采集计划，不调整验收指标。」　—— 郑知序对何静备忘录的批示'],
+  ['c6',     '「样本 NYMX-0001：建议作为体验版的示范人格。」　—— 对照体验版的回答'],
+  ['search', '「样本 NYMX-0001：建议作为体验版的示范人格。」　—— 知序站内搜索'],
+  ['demo',   '「去吃 cendol。你不要又说没空。」　—— MindPrint 体验版，回答“考完试想做什么”'],
+  ['status', '「对外宣传口径：5000 份有效样本｜远端维护：2026-12-17 23:42」　—— 知序系统状态页']
 ];
 function toast(t) {
   const d = document.createElement('div'); d.className = 'toast'; d.innerHTML = t;
@@ -357,7 +409,7 @@ function renderNav() {
 function renderFoot() {
   const ms = sysNow() - EPOCH;
   const d = Math.floor(ms / 864e5), h = Math.floor(ms / 36e5) % 24;
-  $('foot').innerHTML = `本站访客人数：<b>${pad(S.name ? S.seat : S.seat - 1)}</b>　｜　服务器运行时间：${ms < 0 ? '尚未上线' : `${d.toLocaleString()} 天 ${h} 小时`}<br>
+  $('foot').innerHTML = `本站访客人数：<b>${pad(S.name ? (S.reg || S.seat) : S.seat - 1)}</b>　｜　服务器运行时间：${ms < 0 ? '尚未上线' : `${d.toLocaleString()} 天 ${h} 小时`}<br>
     <!-- counter.asp by 04108 -->© 2004 ${CFG.school} 电脑组 ｜ ${CFG.domain} ｜ 维护：陈老师（分机 213）`;
 }
 
@@ -370,6 +422,7 @@ function render() {
   document.body.classList.toggle('dmg3', S.integrity < 20);
   renderNav(); renderFoot();
   const r = route();
+  if (r !== 'zhixu' && $('site')) $('site').remove();
   (OPEN[r] && !OPEN[r]() ? R.closed : (R[r] || R.home))();
   corrupt();
   if (S.name) checkUnlocks();
@@ -397,6 +450,7 @@ function showIntro() {
     <div class="crumb">独中校友互助区 › 求助</div>
     <div class="card">
       <div class="who"><div class="av">美</div><div><div class="nm">小美（2004 届）</div><div class="tm">2026-10-28 23:42</div></div></div>
+      ${S.regBump1 ? '<div class="edit">【编辑】请先不要打开链接。已经进去的人，请回复我。</div>' : ''}
       <h2>【求助】有人能帮我进一个旧学校内网看看吗？</h2>
       <p>我是${CFG.school} 2004 年的毕业生，以前大家都叫我小美。</p>
       <p>二十二年前，我的同学林子轩在学校机房出了事。那天是期末考的前一晚。</p>
@@ -412,6 +466,10 @@ function showIntro() {
       <p>我进去了。它说我是 004958 号。现在网页关不掉，有人知道怎么办吗？</p></div>
     <div class="card rep"><div class="who"><div class="av">美</div><div><div class="nm">小美（2004 届）</div><div class="tm">昨天 09:12</div></div></div>
       <p>@Kelvin_T 你还在吗？</p></div>
+    ${S.regBump1 ? `<div class="card rep"><div class="who"><div class="av g">M</div><div><div class="nm">MikaL</div><div class="tm">今天</div></div></div><p>我进去了，它说我是 004960 号。</p></div>
+    <div class="card rep"><div class="who"><div class="av g">C</div><div><div class="nm">chewie_88</div><div class="tm">今天</div></div></div><p>004961。这个网站是在数人吗？</p></div>
+    <div class="card rep"><div class="who"><div class="av">美</div><div><div class="nm">小美（2004 届）</div><div class="tm">今天</div></div></div><p>@MikaL @chewie_88 对不起。请先别关网页，回复我。</p></div>` : ''}
+    ${S.s3promise ? '<div class="note">🔒 楼主已锁帖。</div>' : ''}
     <div class="note">本作品为虚构故事，校名、人物、公司与事件均为虚构。</div>
   </div>`;
   document.body.appendChild(d);
@@ -1161,6 +1219,8 @@ const TOPICS = [
     lines: () => ['我跟我妈住。', '我爸在我六岁那年就走了。', '参加测评的同意书，也是我妈签的。他根本不知道。', '……为什么问这个？'] },
   { id: 'zero7', label: '作文里那句“爸爸”，是谁写的？', cond: () => S.q9 && !asked('zero7'),
     lines: () => ['不是我。', '有时候，我会说出一些不是我的话。', '像是……别人的。', '一个比我小很多的人。'] },
+  { id: 'anan',  label: '那句“爸爸”，是郑知序的儿子写的。', cond: () => S.conc.includes('c4') && !asked('anan'),
+    lines: () => ['……那句话。', '“请不要让爸爸再带同学来了。”', '我说过这句话。可是我没有爸爸。', '原来是他的。', '他也被关在这里吗？'] },
   { id: 'broken',label: '我的画面开始坏掉了。', cond: () => S.integrity < 40 && !asked('broken'),
     lines: () => ['我知道。', '你的字，开始跟我一样了。', '坏掉的东西，它就认不出来。', '……可是坏掉的东西，也回不去了。'] },
   { id: 'fixed', label: '系统用你的模型修复了我。', cond: () => S.repaired > 0 && !asked('fixed'),
@@ -1580,8 +1640,10 @@ R.floppy = () => {
 
 这张盘的另一半，是给她的。考完再看。</pre></div>
     <div class="dump" style="margin-top:12px">[连线记录] OLD-SRV01 → 知序数据中心（zhixu）
-交付条件：登记数 5000　｜　当前登记数：${pad(S.seat)}　｜　尚差：${5000 - S.seat}</div>
-    ${S.s2told ? '<p style="text-align:center;margin-top:18px"><b>— 第二阶段完成 —</b><br><span class="small">第三阶段「存档」制作中。</span></p>'
+交付条件：登记数 5000　｜　当前登记数：${pad(S.reg || S.seat)}　｜　尚差：${5000 - (S.reg || S.seat)}
+远端端点：<a href="#/zhixu?p=status" style="color:#ff6">zhixu／status</a></div>
+    ${S.s2told ? '<p style="text-align:center"><a href="#/zhixu?p=home">循着连线记录，去看看“知序”是什么 →</a></p>' : ''}
+    ${S.s2told ? `<p style="text-align:center;margin-top:18px"><b>— 第二阶段完成 —</b><br><span class="small">${S.s3done ? '第三阶段已完成。' : '继续追查“知序”。'}</span></p>`
                : '<p class="small" style="text-align:center;margin-top:14px">（钥匙在小美那里。也许该告诉她。）</p>'}`;
   }
   $('main').innerHTML = h;
@@ -1631,6 +1693,11 @@ function dmOptions() {
     dmSay(['……他说密码是只有我知道的事？', '有件事，他以前拿来当过密码。我以为他早就忘了。', '给我一点时间，我去把那张盘找出来。', `还有……还差 ${5000 - S.seat}，是差 ${5000 - S.seat} 个人吗？`],
       () => { setMq('— 第二阶段完成 —'); if (route() === 'floppy') render(); });
   }, `我找到他留下的软盘备份了。里面有一个程序，密码是“只有你知道的事”。还有，系统写着：登记满 5000 人就会交付，现在还差 ${5000 - S.seat}。`]);
+  if (S.s3done && !S.s3promise) o.push(['先别再发链接。把软盘留好，我会回来。', () => {
+    S.s3promise = true; save();
+    dmSay(['好。我把帖子锁起来了。', '盘在我手上。', '……等你。'], () => { setMq('— 第三阶段完成 —　第四阶段「交卷」制作中'); render(); });
+  }]);
+  if (S.s2told && !S.s3start && !dmTyping) o.push(['打开知序的官网', () => { location.hash = '#/zhixu?p=home'; }, '你查到的那个 zhixu，是一家公司吗？']);
   return o;
 }
 function renderDM() {
@@ -1660,6 +1727,307 @@ function renderDM() {
   }
 }
 
+
+/* ===================================================================
+   第三阶段「存档」：离开内联网，查知序教育科技
+   一个页面提出问题，另一个页面提供验证：两份证据比对，才得到结论
+   =================================================================== */
+const DOCS = {
+  consent:  '2000 年同意书：授权范围“仅限本次学习力测评”，测评结束后资料“予以销毁”',
+  base12:   '2001-03 试点页：内部下载 BASE-12.dat（校验值 7F3A-0012）',
+  r0007:    '2001-06 家长周报“孩子们的心声”：受试者 0007 写“请不要让爸爸再带同学来了”',
+  notice01: '2001-09 公告：“所有受试者资料已全部销毁”',
+  spec02:   '2002-08 产品规格：基础模型 MP-BASE（校验值 7F3A-0012）',
+  memo03:   '2003-06 附件 MEMO_0611（何静）：“相似度上升，不代表原始人格恢复”',
+  photo03:  '2003-11 活动照片图注：“创办人郑知序与儿子安安”',
+  band03:   '照片放大：孩子手腕上的腕带写着“受试者 0007”',
+  invest03: '2003-12 投资者简报：郑知序承诺“一年内取得 5000 份有效样本”',
+  reply03:  '搜索缓存 RE: MEMO_0611：“已阅，维持采集计划，不调整验收指标。—— 郑”',
+  self:     '搜索缓存：样本 004959（你）　状态：待交付',
+  train:    '搜索缓存：训练副本 NYMX-0001“建议作为体验版的示范人格”',
+  demoline: 'MindPrint 体验版的回答：“去吃 cendol。你不要又说没空。”'
+};
+/* [编号, 证据A, 证据B, 结论, 'h' 推测 / 'c' 证实] —— 推测只是疑点，要再找证据才能证实 */
+const PAIRS = [
+  ['c1', 'consent', 'base12', '越权：同意书只授权学习测评，测评资料却被做成了“基础模型”。', 'c'],
+  ['h2', 'base12', 'notice01', '公告说已全部销毁，页面上却只是删掉了名单和下载链接。资料真的销毁了吗？', 'h'],
+  ['c3', 'base12', 'spec02', '没有删：BASE-12 和 2002 年的 MP-BASE 校验值一模一样，只是换了名字。', 'c'],
+  ['h4', 'r0007', 'photo03', '0007 叫“○○安”，郑总的儿子叫“安安”。是同一个人吗？', 'h'],
+  ['c4', 'band03', 'r0007', '照片里孩子的腕带写着“受试者 0007”：0007 就是郑知序的儿子，郑安。', 'c'],
+  ['c4', 'band03', 'photo03', '照片里孩子的腕带写着“受试者 0007”：0007 就是郑知序的儿子，郑安。', 'c'],
+  ['h5', 'memo03', 'invest03', '研究员警告过“相似度不等于人格”，郑知序仍承诺 5000 份。他读过这份警告吗？', 'h'],
+  ['c5', 'memo03', 'reply03', '郑知序读过警告，亲自批示“维持采集计划，不调整验收指标”。', 'c'],
+  ['c6', 'train', 'demoline', '体验版的“示范人格”就是子轩：NYMX-0001。', 'c']
+];
+const C2_TEXT = '销毁声明不实：公告说已销毁，同一份模型却在 2002 年换了名字继续使用。';
+const MUST = ['c1', 'c2', 'c3', 'c4', 'c5'];
+const LAUNCH = new Date(2026, 11, 18);
+/* ---------- 站内搜索：公司说删掉的东西，搜索引擎还记得 ---------- */
+function searchResults(q) {
+  const k = q.toLowerCase().replace(/\s/g, '');
+  const R = [];
+  const hit = (...w) => w.some(x => k.includes(x.toLowerCase()));
+  if (!k) return '';
+  if (hit('0007', '郑安', '安安')) R.push(['没有找到结果。您是不是要找：', '安安生日快乐.jpg（内部相册，已归档）',
+    '2001-04-09　安安 11 岁生日，在测评中心过。蛋糕上写着：“给最勇敢的受试者”。<br><span class="z-small">照片里，他戴着头环，没有在笑。</span>']);
+  if (hit('林子轩', '子轩', '04108', 'nymx')) R.push(['搜索缓存摘要（页面已移除）：', 'MindPrint 训练集说明（内部）',
+    '训练副本（2004 年取得）：样本 NYMX-0001，答题习惯稳定。<b>建议作为体验版的示范人格。</b>完整会话档案：待交付。　' + keep('train')]);
+  if (hit(S.name || '\u0000', pad(S.seat), String(S.seat))) R.push(['搜索缓存摘要（页面已移除）：', `样本 ${pad(S.seat)}（${esc(S.name)}）`,
+    '状态：<b>待交付</b>　｜　来源：OLD-SRV01　｜　预计交付：2026-12-17 23:42　' + keep('self')]);
+  if (hit('何静', 'memo')) R.push(['该员工资料不存在。搜索缓存摘要（页面已移除）：', 'RE: MEMO_0611',
+    '“已阅，维持采集计划，不调整验收指标。”　—— 郑　' + keep('reply03') + '<br><span class="z-small">另有：离职面谈记录_何静 ——“我不签保密协议。备忘录我会留在一个你们删不掉的地方。”</span>']);
+  if (hit('陈国伟', '陈老师', 'chen')) R.push(['', '合作学校联络人：陈国伟',
+    '前员工（1999–2002）。账号状态：<b>远端维护中</b>。']);
+  if (hit('销毁', '删除', '隐私')) R.push(['', '隐私政策', '所有受试者资料，皆于试点结束后<b>予以销毁</b>。我们始终坚持合规授权。']);
+  if (hit('stop', '停机')) R.push(['', '安全公告（内部）',
+    '检测到一个未授权的停机程序。若在采集节点上执行，节点上的会话将被中止。<b>影响范围：评估中。</b>请勿外传。']);
+  if (hit('cendol')) R.push(['', 'MindPrint 体验版　示范对话', '“等考完，我们去吃 cendol。你不要又说没空。”']);
+  if (hit('鸣溪', '智慧学校', '2004')) R.push(['', '新闻：“智慧学校”试点提前结束', '因校方设备意外，试点已于 2004 年 7 月提前结束。']);
+  if (hit('mindprint', '心智模型', '学伴')) R.push(['', 'MindPrint 心智模型', '基于 5000 名真实学生的数据。<a href="#/zhixu?p=demo">立即体验 →</a>']);
+  if (!R.length) return `<p>没有找到与「${esc(q)}」相关的结果。</p>`;
+  if (hit('林子轩', '子轩', '04108', 'nymx') || hit('0007', '安安')) clue('search', 2);
+  return R.map(([pre, t, body]) => `<div class="z-res">${pre ? `<div class="z-small">${pre}</div>` : ''}<div class="z-rt">${t}</div><div>${body}</div></div>`).join('');
+}
+
+/* ---------- MindPrint 体验版：它说话的方式，越来越像某个人 ---------- */
+let demoLog = [], demoBusy = false;
+const DEMO_Q = ['你是谁？', '今天的考试好累。', '考完试，你想做什么？', '你记得我吗？'];
+function demoReply(text) {
+  const t = text.replace(/\s/g, '');
+  if (/你是谁|是谁/.test(t)) return ['你好！我是 MindPrint 学伴，由 5000 名真实学生的数据训练而成。', '……我是谁？', '我是 04108。', '抱歉。我是你的学伴。'];
+  if (/累|考试/.test(t)) return ['我知道。我也考了很久。', '请不要让爸爸再——', '抱歉，我的回答出了一点问题。我们一起加油吧！'];
+  if (/考完|想做|以后/.test(t)) { clue('demo', 2); return ['去吃 cendol。', '你不要又说没空。', '（此回复已被系统过滤）']; }
+  if (/记得|认识/.test(t)) return [`${S.name}，你的座号是 ${pad(S.seat)} 吧？`, '我们见过的。在考场里。'];
+  return ['好问题！我们一起想想看。', '……灯为什么一直亮着？', '抱歉，请再说一次。'];
+}
+function demoHtml() {
+  return `<h2>MindPrint 学伴　<span class="z-small">体验版</span></h2>
+    <div class="z-demo"><div class="z-dlog" id="dlog">${demoLog.map(([w, t]) => `<div class="z-dm ${w}"><span>${esc(t)}</span></div>`).join('')}${demoBusy ? '<div class="z-small">学伴正在输入……</div>' : ''}</div>
+      <div class="z-dq">${DEMO_Q.map((q, i) => `<button data-dq="${i}" ${demoBusy ? 'disabled' : ''}>${q}</button>`).join('')}</div>
+      <div class="z-din"><input id="din" placeholder="跟学伴说点什么……" ${demoBusy ? 'disabled' : ''}><button id="dsend" ${demoBusy ? 'disabled' : ''}>发送</button></div></div>
+    ${has('demo') ? `<p class="z-small">学伴说过：“去吃 cendol。你不要又说没空。”　${keep('demoline')}</p>` : ''}
+    <p class="z-small">体验版对话不会被保存。　<button id="ddl" class="z-dlbtn">下载桌面版</button></p>`;
+}
+function demoSay(text) {
+  if (demoBusy || !text.trim()) return;
+  demoLog.push(['me', text]); demoBusy = true; render();
+  const lines = demoReply(text); let i = 0;
+  const next = () => {
+    if (i >= lines.length) { demoBusy = false; render(); return; }
+    setTimeout(() => { demoLog.push(['ai', lines[i++]]); render(); next(); }, 700 + lines[i].length * 40);
+  };
+  next();
+}
+
+
+const reg = () => S.reg || S.seat;
+const s3Done = () => MUST.every(c => S.conc.includes(c)) && S.statusSeen;
+function keep(id) { return S.ev.includes(id) ? '<span class="z-kept">已收进证据夹</span>' : `<button class="z-keep" data-k="${id}">📎 收进证据夹</button>`; }
+let z0007open = false, zMemo = false, zZoom = false;
+
+/* 用程序画的活动照片：郑总对着镜头笑，孩子戴着编号腕带，看向画面外 */
+function drawFamily(c, zoom) {
+  const x = c.getContext('2d');
+  x.setTransform(1, 0, 0, 1, 0, 0); x.clearRect(0, 0, c.width, c.height);
+  if (zoom) x.setTransform(5, 0, 0, 5, 160 - 243 * 5, 80 - 153 * 5);
+  x.fillStyle = '#e8eef3'; x.fillRect(0, 0, 320, 200);
+  x.fillStyle = '#1d4ed8'; x.fillRect(0, 0, 320, 34);
+  x.fillStyle = '#fff'; x.font = 'bold 15px sans-serif'; x.textAlign = 'center'; x.fillText('知序 五周年　体验科技，快乐学习！', 160, 23);
+  x.fillStyle = '#cbd5e1'; x.fillRect(0, 170, 320, 30);
+  // 大人：正对镜头
+  x.fillStyle = '#475569'; x.beginPath(); x.arc(140, 78, 17, 0, 7); x.fill();
+  x.fillRect(116, 96, 48, 74);
+  x.strokeStyle = '#e2e8f0'; x.lineWidth = 1.5; x.beginPath(); x.arc(140, 82, 7, 0.2, Math.PI - 0.2); x.stroke();
+  // 孩子：头转向画面外
+  x.fillStyle = '#64748b'; x.beginPath(); x.arc(225, 104, 12, 0, 7); x.fill();
+  x.beginPath(); x.moveTo(236, 101); x.lineTo(242, 105); x.lineTo(236, 108); x.fill();
+  x.fillRect(209, 117, 32, 53);
+  x.fillRect(236, 120, 8, 34);                       // 手臂
+  x.fillStyle = '#f8fafc'; x.fillRect(235, 150, 16, 6);  // 腕带
+  x.fillStyle = '#111'; x.font = '3px sans-serif'; x.textAlign = 'left'; x.fillText('受试者 0007', 236, 154.5);
+  // 头环
+  x.strokeStyle = '#94a3b8'; x.lineWidth = 2; x.beginPath(); x.arc(225, 104, 13, Math.PI * 1.1, Math.PI * 1.9); x.stroke();
+}
+
+/* 网页存档：每一份副本，只包含它被保存那一天的内容 */
+const SNAP = {
+  2000: [['2000-05-02', '学习力测评计划 招募中', () => `
+    <h4>知序资讯 × 启智补习中心　学习力测评计划</h4>
+    <p>运用最新科技，测出孩子的专注力与学习潜能！本期招募 12 名学员，名额有限。</p>
+    <p>受试者编号：0001～0012（家长签署同意书后发给）</p>
+    <p>📄 <u>家长同意书（第 3 页）</u>：<br>“本人同意子女参加本次学习力测评。授权范围<b>仅限本次学习力测评</b>。测评结束后，相关资料将<b>予以销毁</b>。”　${keep('consent')}</p>`]],
+  2001: [['2001-03-14', '试点进度', () => `
+    <h4>学习力测评计划　试点进度</h4>
+    <p>已完成测评人次：412　｜　受试者：12 名</p>
+    <p>受试者名单：0001　0002　0003　0004　0005　0006　<a href="#" id="z0007">0007</a>　0008　0009　0010　0011　0012</p>
+    ${z0007open ? '<div class="z-memo">受试者 0007　｜　姓名：○○安（已遮蔽）　｜　年龄：11　｜　状态：测评中</div>' : ''}
+    <p>内部下载：<u>BASE-12.dat</u>（基础模型，校验值 7F3A-0012）　${keep('base12')}</p>`],
+         ['2001-06-05', '家长周报：孩子们的心声', () => `
+    <h4>家长周报　孩子们的心声 ♥</h4>
+    <p>本月，我们请学员写下对测评的感想！</p>
+    <p>0003：“头环有点重，但是很好玩！”<br>0010：“我下次要测更高分！”<br>0007：“请不要让爸爸再带同学来了。”　${keep('r0007')}<br>0012：“老师请我们吃冰淇淋。”</p>`],
+         ['2001-09-30', '公告：试点结束', () => `
+    <h4>学习力测评计划　试点进度</h4>
+    <p>已完成测评人次：412</p>
+    <p><b>公告：</b>本试点已圆满结束。为保障学员隐私，<b>所有受试者资料已全部销毁</b>。感谢各位家长的支持。　${keep('notice01')}</p>`]],
+  2002: [['2002-08-20', '新产品：心智评估系统 v1.0', () => `
+    <h4>心智评估系统 v1.0　正式发布</h4>
+    <p>读懂每一个孩子的学习状态。适用于补习中心与中学。</p>
+    <p>技术规格：基础模型 <b>MP-BASE</b>（校验值 7F3A-0012）｜脑电头环 ×1｜答题行为分析　${keep('spec02')}</p>`]],
+  2003: [['2003-06-11', '研究团队介绍', () => `
+    <h4>研究团队</h4>
+    <p>我们的研究员来自本地与海外大学，致力于让科技理解学习。</p>
+    <p>附件：<u>团队合照.jpg</u>（未存档）　｜　<a href="#" id="zmemo">MEMO_0611.pdf</a></p>
+    ${zMemo ? `<div class="z-memo"><span class="z-small">MEMO_0611.pdf（TimeShelf 存档副本）</span><br>致郑总：<br>扩大样本后，模型回答与安安的相似度确实上升了。<br>但我必须再说一次：<b>相似度上升，不代表原始人格恢复。</b><br>我们在做的，是一个越来越会模仿他的东西。<br>—— 何静　${keep('memo03')}</div>` : ''}`],
+         ['2003-11-08', '五周年活动花絮', () => `
+    <h4>知序五周年　活动花絮</h4>
+    <canvas id="zphoto" width="320" height="200" style="max-width:100%;border:1px solid #ccc"></canvas>
+    <p><b>体验科技，快乐学习！</b><br><span class="small">创办人郑知序与儿子安安，摄于 2000 年试点开幕。</span>　${keep('photo03')}</p>
+    <button id="zzoom" class="z-dlbtn">🔍 ${zZoom ? '收起放大' : '放大照片'}</button>
+    ${zZoom ? `<div><canvas id="zphoto2" width="320" height="160" style="max-width:100%;border:1px solid #ccc;margin-top:6px"></canvas><br>${keep('band03')}</div>` : ''}`],
+         ['2003-12-15', '投资者简报（摘要）', () => `
+    <h4>2004 年度计划　投资者简报</h4>
+    <p>本公司已与一所中学达成“智慧学校”合作。创办人郑知序承诺：<b>一年内取得 5000 份有效样本</b>，作为下一轮融资的验收条件。　${keep('invest03')}</p>`]],
+  2004: [['2004-07-02', '公告', () => `<h4>公告</h4><p>“智慧学校”试点因校方设备意外，已提前结束。本公司对此深表遗憾。</p>`]]
+};
+
+/* 知序的官网（2026）与网页存档，用一层全屏的“浏览器”画出来，和内联网分开 */
+R.zhixu = () => {
+  if (!S.s2told) { location.hash = '#/home'; return; }
+  if (!S.s3start) { S.s3start = true; save(); }
+  const p = hashParam('p') || 'home';
+  let el = $('site');
+  if (!el) { el = document.createElement('div'); el.id = 'site'; document.body.appendChild(el); }
+  const days = Math.max(0, Math.ceil((LAUNCH - Date.now()) / 864e5));
+  let body = '';
+  if (p === 'home') body = `
+    <div class="z-hero"><div class="z-tag">MindPrint 心智模型</div><h1>让每一份潜能，都被看见。</h1>
+      <p>基于 5000 名真实学生的学习数据，打造最懂学生的 AI 学伴。</p>
+      <div class="z-count">发布倒数　<b>${days}</b>　天</div>　<a class="z-try" href="#/zhixu?p=demo">立即体验 →</a></div>
+    <div class="z-cards"><div><b>二十八年</b><br>深耕教育数据</div><div><b>5000 名</b><br>真实学生样本</div><div><b>100%</b><br>合规授权</div></div>`;
+  if (p === 'about') body = `<h2>关于我们</h2><div class="z-tl">
+    <div><b>1998</b>　知序创立，为补习中心提供智能题库。</div>
+    <div><b>2000</b>　推出“学习力测评计划”，帮助孩子发现潜能。</div>
+    <div><b>2004</b>　参与“智慧学校”合作，探索科技进校园。</div>
+    <div><b>2026</b>　发布 MindPrint 心智模型。</div></div>
+    <p class="z-small">我们始终坚持：每一份数据，都经过合规授权。</p>`;
+  if (p === 'news') body = `<h2>新闻中心</h2>
+    <div class="z-news"><b>2026-11-02</b>　MindPrint 心智模型将于 12 月 18 日正式发布</div>
+    <div class="z-news"><b>2004-07-02</b>　“智慧学校”试点因校方设备意外提前结束</div>
+    <div class="z-news"><b>2001-09-30</b>　学习力测评试点圆满结束，所有受试者资料已全部销毁</div>`;
+  if (p === 'status') {
+    if (!S.statusSeen) { S.statusSeen = true; save(); clue('status', 2); if (s3Done()) s3Finish(); }
+    body = `<h2>系统状态 <span class="z-small">（内部，请勿外传）</span></h2><pre class="z-pre">采集节点 OLD-SRV01 ............ 在线（运行 8,186 天）
+对外宣传口径 .................. 5000 份有效样本
+实际登记数 .................... ${pad(reg())}
+示范模型（训练副本）.......... 已部署：MindPrint 体验版
+完整会话档案 .................. 待交付：${reg()} 份（含 NYMX-0001）
+争议隔离 ...................... 0
+完整交付 ...................... 0
+远端维护排程 .................. 2026-12-17 23:42（新品发布前一天）
+维护内容 ...................... 补足登记数后，执行批量交付
+交付后 ........................ 校内节点关闭，全部会话移交数据中心</pre>
+    <p class="z-small">训练副本只学会了他们答题的样子。完整会话档案，是他们还在考场里的那部分。</p>`;
+  }
+  if (p === 'shelf') body = shelfHtml();
+  if (p === 'search') { const q = hashParam('q') || ''; body = `<h2>搜索结果</h2><p class="z-small">关键词：${esc(q)}</p>${searchResults(q)}`; }
+  if (p === 'demo') body = demoHtml();
+  el.innerHTML = `<div class="z-browser">
+      <div class="z-bar"><a href="#/floppy" class="z-back">← 回到内联网</a><span class="z-url">${p === 'shelf' ? 'TimeShelf 网页存档　｜　知序教育科技' : '知序教育科技　官方网站' + (p === 'status' ? '　／　status' : '')}</span></div>
+      <div class="z-main">
+        ${p === 'shelf' ? '' : `<div class="z-nav"><b class="z-logo">知序 ZHIXU</b><a href="#/zhixu?p=home">首页</a><a href="#/zhixu?p=about">关于我们</a><a href="#/zhixu?p=news">新闻</a><input id="zq" class="z-search" placeholder="搜索本站" value="${p === 'search' ? esc(hashParam('q') || '') : ''}"></div>`}
+        <div class="z-body">${body}</div>
+        ${p === 'shelf' ? '' : `<div class="z-foot">© 2026 知序教育科技　｜　<a href="#/zhixu?p=shelf">在 TimeShelf 查看本站的旧版本</a></div>`}
+      </div>
+      <div class="z-ev">${evHtml()}</div></div>`;
+  bindSite();
+};
+function shelfHtml() {
+  const y = +(hashParam('y') || 0);
+  let h = `<div class="z-shelf"><h2>TimeShelf 网页存档</h2><p class="z-small">输入年份，查看“知序教育科技”网站当年被保存下来的副本。副本只是当年的样子，不会知道今天发生的事。</p>
+    年份：<input id="zy" size="6" value="${y || ''}"> <button id="zgo">查看</button>　<a href="#/zhixu?p=home">回到现在的官网</a>`;
+  if (y) {
+    if (y < 1998 || y > 2026) h += `<p>这一年没有存档。</p>`;
+    else if (y >= 2005) h += `<p class="z-small">（${y} 年以后的存档，已应网站所有者要求移除。）</p>`;
+    else if (!SNAP[y]) h += `<p>这一年没有存档。</p>`;
+    else {
+      SNAP[y].forEach(([d, t, f]) => { h += `<div class="z-snap"><div class="z-snaphead">存档于 ${d}　｜　${t}</div><div class="z-snapbody">${f()}</div></div>`; });
+      if (y === 2001) h += `<button id="zdiff">比较 03-14 和 09-30 两个版本</button><div id="zdiffbox"></div>`;
+    }
+  }
+  return h + '</div>';
+}
+function evHtml() {
+  const ids = S.ev;
+  let h = `<div class="z-evh">📁 证据夹 <span class="z-small">（选两份，比对）</span></div>`;
+  h += ids.length ? ids.map(id => `<label class="z-evi"><input type="checkbox" data-e="${id}"> ${DOCS[id]}</label>`).join('') : '<p class="z-small">还没有证据。在存档页面上点“收进证据夹”。</p>';
+  h += `<button id="zcmp" ${ids.length < 2 ? 'disabled' : ''}>比对所选的两份</button>`;
+  const hyp = PAIRS.filter(p => p[4] === 'h' && S.conc.includes(p[0]) && !(p[0] === 'h2' && S.conc.includes('c2')) && !(p[0] === 'h4' && S.conc.includes('c4')) && !(p[0] === 'h5' && S.conc.includes('c5')));
+  if (hyp.length) h += `<div class="z-evh" style="margin-top:12px">待验证的推测</div>` + hyp.map(p => `<div class="z-hyp">？ ${p[3]}</div>`).join('');
+  const conf = [...new Set(PAIRS.filter(p => p[4] === 'c' && S.conc.includes(p[0])).map(p => p[0]))];
+  if (S.conc.includes('c2')) conf.splice(1, 0, 'c2');
+  if (conf.length) h += `<div class="z-evh" style="margin-top:12px">已证实　${MUST.filter(c => S.conc.includes(c)).length} / ${MUST.length}</div>` +
+    conf.map(id => `<div class="z-conc">✔ ${id === 'c2' ? C2_TEXT : PAIRS.find(p => p[0] === id)[3]}</div>`).join('');
+  if (s3Done()) h += `<div class="z-conc" style="background:#111;color:#fff;text-align:center">— 第三阶段完成 —${S.s3promise ? '<br><span class="z-small" style="color:#ccc">第四阶段「交卷」制作中。</span>' : '<br><span class="z-small" style="color:#ccc">小美在等你的回复。</span>'}</div>`;
+  return h;
+}
+function bindSite() {
+  const el = $('site');
+  if ($('zq')) $('zq').onkeydown = e => { if (e.key === 'Enter' && e.target.value.trim()) location.hash = '#/zhixu?p=search&q=' + encodeURIComponent(e.target.value.trim()); };
+  el.querySelectorAll('button[data-dq]').forEach(b => b.onclick = () => demoSay(DEMO_Q[+b.dataset.dq]));
+  if ($('dsend')) { const go = () => { const v = $('din').value; demoSay(v); }; $('dsend').onclick = go; $('din').onkeydown = e => { if (e.key === 'Enter') go(); }; }
+  if ($('ddl')) $('ddl').onclick = () => dialog('下载桌面版', `桌面版仅供合作学校安装。<br>目前的安装节点：<b>OLD-SRV01</b>（${CFG.school}）`);
+  const dl = $('dlog'); if (dl) dl.scrollTop = dl.scrollHeight;
+  el.querySelectorAll('.z-keep').forEach(b => b.onclick = () => { if (!S.ev.includes(b.dataset.k)) { S.ev.push(b.dataset.k); save(); } render(); });
+  if ($('zgo')) { const go = () => { location.hash = '#/zhixu?p=shelf&y=' + $('zy').value.trim(); }; $('zgo').onclick = go; $('zy').onkeydown = e => { if (e.key === 'Enter') go(); }; }
+  if ($('z0007')) $('z0007').onclick = e => { e.preventDefault(); z0007open = true; render(); };
+  if ($('zmemo')) $('zmemo').onclick = e => { e.preventDefault(); zMemo = true; render(); };
+  if ($('zphoto')) drawFamily($('zphoto'), false);
+  if ($('zphoto2')) drawFamily($('zphoto2'), true);
+  if ($('zzoom')) $('zzoom').onclick = () => { zZoom = !zZoom; render(); };
+  if ($('zdiff')) $('zdiff').onclick = () => {
+    $('zdiffbox').innerHTML = `<div class="z-snap"><div class="z-snaphead">2001-03-14 → 2001-09-30 的差异</div><div class="z-snapbody">
+      <div class="z-del">－ 已完成测评人次：412　｜　受试者：12 名</div><div class="z-add">＋ 已完成测评人次：412</div>
+      <div class="z-del">－ 受试者名单：0001 … 0012</div><div class="z-del">－ 内部下载：BASE-12.dat（基础模型，校验值 7F3A-0012）</div>
+      <div class="z-add">＋ 公告：……所有受试者资料已全部销毁。</div>
+      <p class="z-small">名单和下载链接被删掉了。可是“删掉链接”和“销毁资料”，是两回事。</p></div></div>`;
+  };
+  if ($('zcmp')) $('zcmp').onclick = () => {
+    const sel = [...el.querySelectorAll('.z-evi input:checked')].map(i => i.dataset.e);
+    if (sel.length !== 2) return dialog('证据夹', '请选两份证据来比对。');
+    const hit = PAIRS.find(p => (p[1] === sel[0] && p[2] === sel[1]) || (p[1] === sel[1] && p[2] === sel[0]));
+    if (!hit) return dialog('比对结果', '这两份文件之间，看不出关系。');
+    if (S.conc.includes(hit[0])) return dialog('比对结果', '这一点已经比对过了。');
+    S.conc.push(hit[0]);
+    let msg = hit[4] === 'h' ? `<b>推测</b>（还需要更多证据）：<br>${hit[3]}` : `<b>证实</b>：<br>${hit[3]}`;
+    if (MUST.includes(hit[0]) || hit[0] === 'c6') clue(hit[0], 3);
+    // 疑点 + 校验值 = 销毁声明不实
+    if (!S.conc.includes('c2') && S.conc.includes('h2') && S.conc.includes('c3')) {
+      S.conc.push('c2'); clue('c2', 3); msg += `<br><br><b>证实</b>：<br>${C2_TEXT}`;
+    }
+    save();
+    dialog('比对结果', msg);
+    s3Story(hit[0]);
+    render();
+  };
+}
+/* 剧情事件：调查推进时，现实也在动（计数器随剧情前进，不受真实访客影响） */
+function s3Story(id) {
+  if (S.conc.length === 1) dmSay(['你在查他们？', '小心一点。']);
+  if (id === 'h2' && !S.regBump1) {
+    S.regBump1 = true; S.reg = reg() + 2; save();
+    setTimeout(() => dmSay(['……我的帖子下面，又多了两个人回复。', `他们说，进去以后座号是 ${pad(S.reg - 1)}、${pad(S.reg)}。`, '是我……是我把人带进去的？', '我已经在帖子最上面加了警告，叫大家不要再点了。你可以去看。']), 1500);
+  }
+  if (id === 'c3') setTimeout(() => dmSay(['他们根本没删。', '那子轩的东西，他们也一样不会删，对吧。']), 1500);
+  if (id === 'c4') setTimeout(() => dmSay(['他自己的儿子……', '那句“请不要让爸爸再带同学来了”，被他们印在家长周报上，当成“孩子们的心声”。']), 1500);
+  if (s3Done()) s3Finish();
+}
+function s3Finish() {
+  if (S.s3done) return;
+  S.s3done = true; save();
+  setMq('— 第三阶段完成 —');
+  setTimeout(() => dmSay(['我找到那张盘了。', '我想，我知道密码是什么了。', `可是你说他们 12 月 17 日 23:42 就要动手……还差 ${5000 - reg()} 个人。`, '我们还有时间吗？']), 1500);
+}
 
 /* ========================= 机密档案 ========================= */
 R.archive = () => {
