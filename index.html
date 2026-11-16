@@ -206,6 +206,11 @@
   .z-din { display:flex; gap:6px; padding:8px; border-top:1px solid #f0f0f0; } .z-din input { flex:1; border:1px solid #d1d5db; border-radius:8px; padding:6px 10px; font-family:inherit; }
   .z-din button { border:none; background:#0f766e; color:#fff; border-radius:8px; padding:6px 14px; cursor:pointer; font-family:inherit; }
   .z-hyp { font-size:13px; background:#fffbeb; color:#92400e; border-radius:8px; padding:8px 10px; margin:6px 0; }
+  #finale { position:fixed; inset:0; background:#000; color:#ccc; z-index:100; overflow:auto; text-align:center; font-family:"Courier New","SimSun",monospace; line-height:1.9; padding:40px 20px; }
+  #finale .seq div { opacity:0; animation:fadein .8s forwards; }
+  .fin-epi { max-width:520px; margin:24px auto 0; text-align:left; }
+  .fin-card { background:#111; border:1px solid #333; border-radius:8px; padding:10px 14px; margin:10px 0; font-family:-apple-system,"Segoe UI","Microsoft YaHei",sans-serif; font-size:14px; }
+  #finale button { font-family:inherit; }
   .restored { border:2px dashed #c00; padding:6px; margin-top:6px; color:#c00; }
 
   /* 坏结局 */
@@ -259,7 +264,7 @@ const DEFAULT = {
   name: null, seat: SEAT, role: 'student',
   sync: 0, integrity: 100,
   exam: [false, false, false], q4: false,
-  dumpSeen: false, binSeen: false, clues: [], blogLogin: false, q4wrong: 0, opened: [], chatOpen: false, chatLog: [], chatAsked: [], chatCreep: false, chatCount: {}, invalidEnd: false, repaired: 0, introSeen: false, stage: 1, split: false, dm: [], dmUnread: 0, dmS1: false, s2told: false, dmHello: false, q5: false, q6: false, q7: false, q8: false, q9: false, s2done: false, noteOrder: [], q9pick: -1, s3start: false, ev: [], conc: [], statusSeen: false, reg: 0, regBump1: false, s3done: false, s3promise: false, fakeDate: 0, fakeSetAt: 0, exitTries: 0, exitLin: false, adminSeen: false, realClock: false, boardSeen: false, terminal: false, ghost: false, demoDone: false, badEnd: false,
+  dumpSeen: false, binSeen: false, clues: [], blogLogin: false, q4wrong: 0, opened: [], chatOpen: false, chatLog: [], chatAsked: [], chatCreep: false, chatCount: {}, invalidEnd: false, repaired: 0, introSeen: false, stage: 1, split: false, dm: [], dmUnread: 0, dmS1: false, s2told: false, dmHello: false, q5: false, q6: false, q7: false, q8: false, q9: false, s2done: false, noteOrder: [], q9pick: -1, s3start: false, ev: [], conc: [], statusSeen: false, reg: 0, regBump1: false, s3done: false, s3promise: false, askBlame: false, stopUnlocked: false, released: false, disputed: false, q10: '', final: '', fakeDate: 0, fakeSetAt: 0, exitTries: 0, exitLin: false, adminSeen: false, realClock: false, boardSeen: false, terminal: false, ghost: false, demoDone: false, badEnd: false,
   lastSeen: 0, visits: 0
 };
 
@@ -339,6 +344,11 @@ const CLUES = [
   ['c3',     '「BASE-12 和 MP-BASE 的校验值一模一样。」　—— 证据比对'],
   ['c4',     '「腕带写着受试者 0007。」　—— 五周年活动照片，放大'],
   ['c5',     '「已阅，维持采集计划，不调整验收指标。」　—— 郑知序对何静备忘录的批示'],
+ ['pw',     '「他以前拿我的学号当密码，说这样他永远不会忘。」　—— 小美'],
+  ['release','「会话 004958 已解除。对方已离线。」　—— STOP.EXE 单一会话模式'],
+  ['dispute','「争议隔离：全部样本。批量交付：暂停。」　—— 知序系统状态页'],
+  ['q10',    '「请写出：考试结束后，你想做的第一件事。」　—— 第 10 题'],
+  ['xmtxt',  '「等考完，我们去吃 cendol。你不要又说没空。」　—— XIAOMEI.TXT'],
   ['c6',     '「样本 NYMX-0001：建议作为体验版的示范人格。」　—— 对照体验版的回答'],
   ['search', '「样本 NYMX-0001：建议作为体验版的示范人格。」　—— 知序站内搜索'],
   ['demo',   '「去吃 cendol。你不要又说没空。」　—— MindPrint 体验版，回答“考完试想做什么”'],
@@ -416,6 +426,7 @@ function renderFoot() {
 const R = {};
 function render() {
   if (S.badEnd) return renderBad();
+  if (S.final) return renderFinal();
   if (S.invalidEnd) return renderInvalid();
   document.body.classList.toggle('dmg', S.integrity < 70);
   document.body.classList.toggle('dmg2', S.integrity < 40 && S.integrity >= 20);
@@ -469,6 +480,7 @@ function showIntro() {
     ${S.regBump1 ? `<div class="card rep"><div class="who"><div class="av g">M</div><div><div class="nm">MikaL</div><div class="tm">今天</div></div></div><p>我进去了，它说我是 004960 号。</p></div>
     <div class="card rep"><div class="who"><div class="av g">C</div><div><div class="nm">chewie_88</div><div class="tm">今天</div></div></div><p>004961。这个网站是在数人吗？</p></div>
     <div class="card rep"><div class="who"><div class="av">美</div><div><div class="nm">小美（2004 届）</div><div class="tm">今天</div></div></div><p>@MikaL @chewie_88 对不起。请先别关网页，回复我。</p></div>` : ''}
+    ${S.released ? '<div class="card rep"><div class="who"><div class="av g">K</div><div><div class="nm">Kelvin_T</div><div class="tm">刚刚</div></div></div><p>……我刚刚终于关掉网页了。好像睡了很久。谢谢。</p></div>' : ''}
     ${S.s3promise ? '<div class="note">🔒 楼主已锁帖。</div>' : ''}
     <div class="note">本作品为虚构故事，校名、人物、公司与事件均为虚构。</div>
   </div>`;
@@ -578,7 +590,7 @@ R.exam = () => {
   }
   if (S.stage >= 2) h = `<details class="qd"><summary>✔ 第 1～4 题（已作答）</summary>${h}</details>` + stage2Html();
   $('main').innerHTML = head + h;
-  if (S.stage >= 2) { bindStage2(); const c = $('cur'); if (c) setTimeout(() => c.scrollIntoView({ block: 'center' }), 50); }
+  if (S.stage >= 2) { bindStage2(); bindQ10(); const c = $('cur'); if (c) setTimeout(() => c.scrollIntoView({ block: 'center' }), 50); }
   $('main').querySelectorAll('button[data-q]').forEach(b => b.onclick = () => answer(+b.dataset.q, +b.dataset.o));
   if ($('q4go')) {
     $('q4go').onclick = () => q4submit($('q4in').value);
@@ -1219,6 +1231,8 @@ const TOPICS = [
     lines: () => ['我跟我妈住。', '我爸在我六岁那年就走了。', '参加测评的同意书，也是我妈签的。他根本不知道。', '……为什么问这个？'] },
   { id: 'zero7', label: '作文里那句“爸爸”，是谁写的？', cond: () => S.q9 && !asked('zero7'),
     lines: () => ['不是我。', '有时候，我会说出一些不是我的话。', '像是……别人的。', '一个比我小很多的人。'] },
+  { id: 'stopme',label: 'STOP.EXE 全部执行的话，你也会不见。', cond: () => S.released && !asked('stopme'),
+    lines: () => ['我知道。', '那是我写的。', '……我只是想考完。', '你帮我问问她，好吗？'] },
   { id: 'anan',  label: '那句“爸爸”，是郑知序的儿子写的。', cond: () => S.conc.includes('c4') && !asked('anan'),
     lines: () => ['……那句话。', '“请不要让爸爸再带同学来了。”', '我说过这句话。可是我没有爸爸。', '原来是他的。', '他也被关在这里吗？'] },
   { id: 'broken',label: '我的画面开始坏掉了。', cond: () => S.integrity < 40 && !asked('broken'),
@@ -1484,7 +1498,7 @@ function stage2Html() {
   const q9t = `<b>第 9 题</b>　上面这份作答里，有一句与目前查到的子轩经历<b>不符</b>。是哪一句？依据是什么？
     <span class="small">（可以去找他本人核实，或翻翻他留下的东西。）</span>`;
   if (S.q9) return h + done('第 9 题　' + REPLAY[2], q9t + `<div class="small red">输入行为比对异常：与 lin04108 的历史记录不一致。<br>匹配来源：旧试点数据（权限不足）</div>`)
-    + `<div class="q" style="text-align:center">补考进度：5 / 5　｜　<a href="#/floppy">A:\\FLOPPY.IMG 已部分解锁 →</a></div>`;
+    + (S.stage >= 4 ? q10Html() : `<div class="q" style="text-align:center">补考进度：5 / 5　｜　<a href="#/floppy">A:\\FLOPPY.IMG 已部分解锁 →</a></div>`);
   if (S.q9pick !== 2) return h + cur(q9t + `<div style="margin-top:6px">${REPLAY.map((t, i) => `<button data-r="${i}">${t}</button>`).join('')}</div>`);
   return h + cur(q9t + `<div class="done">你选的是：${REPLAY[2]}</div><div style="margin-top:6px">依据：${WHY.map((t, i) => `<button data-w="${i}">${t}</button>`).join('')}</div>`);
 }
@@ -1617,8 +1631,8 @@ R.floppy = () => {
   let h = `<h3>💾 A:\\FLOPPY.IMG</h3><pre class="term" style="min-height:0">A:\\&gt; DIR
 
  NOTE_0612.TXT      612 字节    2004-06-12 03:10
- STOP.EXE           锁定        密码提示：只有小美知道的事
- XIAOMEI.TXT        锁定        考完再看
+ STOP.EXE           ${S.stopUnlocked ? '已解锁' : '锁定        密码提示：只有小美知道的事'}
+ XIAOMEI.TXT        ${S.q10 !== '' ? '已解锁' : '锁定        考完再看'}
 
         3 个文件</pre>
     <p><a href="#/floppy?f=note">打开 NOTE_0612.TXT</a>　｜　<a href="#" id="runstop">执行 STOP.EXE</a>　｜　<a href="#" id="openxm">打开 XIAOMEI.TXT</a></p>`;
@@ -1646,9 +1660,23 @@ R.floppy = () => {
     ${S.s2told ? `<p style="text-align:center;margin-top:18px"><b>— 第二阶段完成 —</b><br><span class="small">${S.s3done ? '第三阶段已完成。' : '继续追查“知序”。'}</span></p>`
                : '<p class="small" style="text-align:center;margin-top:14px">（钥匙在小美那里。也许该告诉她。）</p>'}`;
   }
+  if (S.stage >= 4 && !S.final) {
+    const ok = (b, y, n, link) => b ? `<span class="done">✔ ${y}</span>` : `<span class="red">✘ ${n}</span>　<a href="${link}">前往 →</a>`;
+    h += `<div class="goal" style="margin-top:10px"><b>交卷前的准备</b><br>
+      单一会话解除：${ok(S.released, '已验证', '尚未验证', '#/floppy?f=stop')}<br>
+      全体批量交付：${ok(S.disputed, '已暂停', '尚未暂停', '#/zhixu?p=status')}<br>
+      最后一题：${ok(S.q10 !== '', '已提交', '尚未提交', '#/exam')}
+      ${s4Ready() ? '<br><b>全部就绪。剩下的，是要不要告诉她，怎么告诉她。</b>（左下角私信）' : ''}</div>`;
+  }
+  if (open === 'stop' && S.stage >= 4) h += stopPanel();
+  if (open === 'xm' && S.q10 !== '') { clue('xmtxt', 3); h += `<div class="notepad"><div class="bar">XIAOMEI.TXT - 记事本</div><pre>${esc(XM_TXT)}</pre></div>
+    <p class="small" style="text-align:center">${s4Ready() ? '（这是给她的。要不要交给她，怎么交给她，由你决定。）' : '（这是给她的。）'}</p>`; }
   $('main').innerHTML = h;
-  $('runstop').onclick = e => { e.preventDefault(); dialog('STOP.EXE', '此程序需要密码。<br>提示：只有小美知道的事。<br><br><span class="small">（你不知道。）</span>'); };
-  $('openxm').onclick = e => { e.preventDefault(); dialog('XIAOMEI.TXT', '考完再看。'); };
+  bindStop();
+  $('runstop').onclick = e => { e.preventDefault();
+    if (S.stage >= 4) location.hash = '#/floppy?f=stop';
+    else dialog('STOP.EXE', '此程序需要密码。<br>提示：只有小美知道的事。<br><br><span class="small">（你不知道。）</span>'); };
+  $('openxm').onclick = e => { e.preventDefault(); if (S.q10 !== '') location.hash = '#/floppy?f=xm'; else dialog('XIAOMEI.TXT', '考完再看。'); };
 };
 
 
@@ -1693,9 +1721,14 @@ function dmOptions() {
     dmSay(['……他说密码是只有我知道的事？', '有件事，他以前拿来当过密码。我以为他早就忘了。', '给我一点时间，我去把那张盘找出来。', `还有……还差 ${5000 - S.seat}，是差 ${5000 - S.seat} 个人吗？`],
       () => { setMq('— 第二阶段完成 —'); if (route() === 'floppy') render(); });
   }, `我找到他留下的软盘备份了。里面有一个程序，密码是“只有你知道的事”。还有，系统写着：登记满 5000 人就会交付，现在还差 ${5000 - S.seat}。`]);
+  if (S.s3promise && S.stage < 4) o.push(['我回来了。', () => {
+    S.stage = 4; save(); setMq('第四阶段「交卷」');
+    dmSay(['……你回来了。', '密码，我想起来了。', `他以前拿我的学号当密码，说这样他永远不会忘：${XM_PW}。`, '可是你先帮我确认一件事。', '那个程序……会不会伤害到他们？'], () => render());
+  }]);
+  finalOpts().forEach(x => o.push(x));
   if (S.s3done && !S.s3promise) o.push(['先别再发链接。把软盘留好，我会回来。', () => {
     S.s3promise = true; save();
-    dmSay(['好。我把帖子锁起来了。', '盘在我手上。', '……等你。'], () => { setMq('— 第三阶段完成 —　第四阶段「交卷」制作中'); render(); });
+    dmSay(['好。我把帖子锁起来了。', '盘在我手上。', '……等你。'], () => { setMq('— 第三阶段完成 —　小美在等你回来。'); render(); });
   }]);
   if (S.s2told && !S.s3start && !dmTyping) o.push(['打开知序的官网', () => { location.hash = '#/zhixu?p=home'; }, '你查到的那个 zhixu，是一家公司吗？']);
   return o;
@@ -1922,11 +1955,16 @@ R.zhixu = () => {
 实际登记数 .................... ${pad(reg())}
 示范模型（训练副本）.......... 已部署：MindPrint 体验版
 完整会话档案 .................. 待交付：${reg()} 份（含 NYMX-0001）
-争议隔离 ...................... 0
+争议隔离 ...................... ${S.disputed ? '全部样本' : '0'}
 完整交付 ...................... 0
 远端维护排程 .................. 2026-12-17 23:42（新品发布前一天）
 维护内容 ...................... 补足登记数后，执行批量交付
 交付后 ........................ 校内节点关闭，全部会话移交数据中心</pre>
+    ${S.stage >= 4 ? (S.disputed
+      ? '<div class="z-conc">✔ 已依《争议样本处理程序》（2001 年修订）提出全体争议。<br>争议隔离：全部样本　｜　批量交付：暂停，等待人工复核。</div>'
+      : `<div class="z-memo"><b>争议样本处理程序（2001 年修订）</b><br>涉及授权争议的样本，须隔离并等待人工复核。<br>
+         附上的证据：${['c1', 'c2', 'c5'].map(c => S.conc.includes(c) ? '✔' : '✘').join(' ')}（越权／销毁声明不实／明知仍继续）<br>
+         <button id="zdispute" ${['c1', 'c2', 'c5'].every(c => S.conc.includes(c)) ? '' : 'disabled'}>替全部样本提出争议</button></div>`) : ''}
     <p class="z-small">训练副本只学会了他们答题的样子。完整会话档案，是他们还在考场里的那部分。</p>`;
   }
   if (p === 'shelf') body = shelfHtml();
@@ -1968,7 +2006,7 @@ function evHtml() {
   if (S.conc.includes('c2')) conf.splice(1, 0, 'c2');
   if (conf.length) h += `<div class="z-evh" style="margin-top:12px">已证实　${MUST.filter(c => S.conc.includes(c)).length} / ${MUST.length}</div>` +
     conf.map(id => `<div class="z-conc">✔ ${id === 'c2' ? C2_TEXT : PAIRS.find(p => p[0] === id)[3]}</div>`).join('');
-  if (s3Done()) h += `<div class="z-conc" style="background:#111;color:#fff;text-align:center">— 第三阶段完成 —${S.s3promise ? '<br><span class="z-small" style="color:#ccc">第四阶段「交卷」制作中。</span>' : '<br><span class="z-small" style="color:#ccc">小美在等你的回复。</span>'}</div>`;
+  if (s3Done()) h += `<div class="z-conc" style="background:#111;color:#fff;text-align:center">— 第三阶段完成 —${S.stage >= 4 ? '<br><span class="z-small" style="color:#ccc">第四阶段「交卷」进行中。</span>' : S.s3promise ? '<br><span class="z-small" style="color:#ccc">回到私信，告诉她你回来了。</span>' : '<br><span class="z-small" style="color:#ccc">小美在等你的回复。</span>'}</div>`;
   return h;
 }
 function bindSite() {
@@ -1991,6 +2029,12 @@ function bindSite() {
       <div class="z-del">－ 受试者名单：0001 … 0012</div><div class="z-del">－ 内部下载：BASE-12.dat（基础模型，校验值 7F3A-0012）</div>
       <div class="z-add">＋ 公告：……所有受试者资料已全部销毁。</div>
       <p class="z-small">名单和下载链接被删掉了。可是“删掉链接”和“销毁资料”，是两回事。</p></div></div>`;
+  };
+  if ($('zdispute')) $('zdispute').onclick = () => {
+    S.disputed = true; save(); clue('dispute', 3);
+    dialog('争议样本处理', '已受理。<br>争议隔离：全部样本。<br>批量交付：<b>暂停</b>，等待人工复核。');
+    setTimeout(() => dmSay(['他们……停下来了？', '谢谢你。', '可是，子轩还在里面，对不对？']), 1500);
+    render();
   };
   if ($('zcmp')) $('zcmp').onclick = () => {
     const sel = [...el.querySelectorAll('.z-evi input:checked')].map(i => i.dataset.e);
@@ -2028,6 +2072,141 @@ function s3Finish() {
   setMq('— 第三阶段完成 —');
   setTimeout(() => dmSay(['我找到那张盘了。', '我想，我知道密码是什么了。', `可是你说他们 12 月 17 日 23:42 就要动手……还差 ${5000 - reg()} 个人。`, '我们还有时间吗？']), 1500);
 }
+
+/* ===================================================================
+   第四阶段「交卷」
+   玩家决定是否找齐、验证并交出真相；小美决定是否结束这段回应。
+   =================================================================== */
+const XM_PW = '04117';   // 小美的学号：子轩以前拿来当密码，说这样就永远不会忘
+const XM_TXT = `小美：
+
+如果你在看这个，代表我考完了。
+（不管考得怎样，都不准笑我。）
+
+等考完，我们去吃 cendol。你不要又说没空。
+
+还有，心脏的事，对不起，一直没跟你说。
+我怕你也像我妈一样，每天都在担心。
+
+—— 子轩　2004-06-17　机房`;
+const s4Ready = () => S.released && S.disputed && S.q10 !== '';
+
+function stopPanel() {
+  if (!S.stopUnlocked) return `<div class="notepad"><div class="bar">STOP.EXE</div><pre>STOP.EXE  v0.3  by 04108
+请输入密码：</pre><div style="padding:6px 10px"><input id="spw" type="password" size="10"> <button id="sgo">执行</button>
+  <span class="small">提示：只有小美知道的事</span></div></div>`;
+  return `<div class="notepad"><div class="bar">STOP.EXE</div><pre>STOP.EXE  v0.3  by 04108　｜　密码正确
+
+[1] 单一会话模式（测试用）
+    只能定位“索引已恢复”的会话。目前可用：004958。
+    其余会话的索引，只有全部会话模式才会重建。
+[2] 全部会话模式
+    解除节点上所有会话，并删除模型目录 /models/04108。
+    ⚠ 此操作无法复原。</pre>
+  <div style="padding:6px 10px">[1] 会话编号：<input id="ssid" size="10" placeholder="例：004xxx"> <button id="stest">解除这个会话</button>
+  <div id="slog" class="small" style="margin-top:6px">${S.released ? '会话 004958 已解除。对方已离线。' : ''}</div>
+  <div style="margin-top:8px">[2] 🔒 全部会话模式：须由密码持有人（04117）亲自确认。</div></div></div>`;
+}
+function bindStop() {
+  if ($('sgo')) { const go = () => {
+    if ($('spw').value.trim() === XM_PW) { S.stopUnlocked = true; save(); clue('pw', 2); render(); }
+    else dialog('STOP.EXE', '密码错误。');
+  }; $('sgo').onclick = go; $('spw').onkeydown = e => { if (e.key === 'Enter') go(); }; }
+  if ($('stest')) $('stest').onclick = () => {
+    const v = $('ssid').value.trim().toUpperCase().replace(/\s/g, '');
+    if (/^0*4108$|^NYMX-?0*1$|GHOST/.test(v)) return dialog('STOP.EXE', '拒绝：白名单会话不能在单一模式下解除。');
+    if (/^0*4959$/.test(v)) return dialog('STOP.EXE', '会话 004959 是你自己正在使用的会话。<br>你不能在里面解除自己。');
+    if (!/^0*4958$/.test(v)) return dialog('STOP.EXE', `会话 ${esc(v)} 的索引尚未恢复。<br><span class="small">单一模式目前只能定位：004958。</span>`);
+    if (S.released) return dialog('STOP.EXE', '会话 004958 已经解除了。');
+    S.released = true; save(); clue('release', 3);
+    $('slog').innerHTML = '正在解除会话 004958……<br>会话 004958：最后输入“……”<br><b>会话 004958 已解除。对方已离线。</b>';
+    setMq('会话 004958 已解除。');
+    setTimeout(() => dmSay(['Kelvin 回我了！', '他说他终于关掉网页了，好像睡了很久。', '他没事。他真的没事。', '所以……那个程序，是把人放出来，不是把人删掉。']), 1500);
+  };
+}
+
+/* 第 10 题：没有标准答案，交出这张卷子才是重点 */
+function q10Html() {
+  const t = `<b>第 10 题</b>（最后一题）　请写出：考试结束后，你想做的第一件事。`;
+  if (S.q10 !== '') return `<details class="qd"><summary>✔ 第 10 题　已交卷</summary><div class="q">${t}<div class="done">你的答案：${esc(S.q10)}</div></div></details>
+    <div class="q" style="text-align:center">考试结束。　｜　<a href="#/floppy?f=xm">XIAOMEI.TXT 已解锁 →</a></div>`;
+  return `<div class="q" id="cur">${t}<div class="small">（没有标准答案。）</div>
+    <textarea id="q10in" rows="3" style="width:95%;margin-top:6px"></textarea><br><button id="q10go">交　卷</button></div>`;
+}
+function bindQ10() {
+  if (!$('q10go')) return;
+  $('q10go').onclick = () => {
+    const v = $('q10in').value.trim();
+    if (!v) return dialog('交卷', '写一点什么吧。什么都可以。');
+    S.q10 = v.slice(0, 200); save(); clue('q10', 2);
+    const echo = /cendol|小美|吃/.test(v);
+    dialog('交卷', `考生 04108，交卷成功。<br>考试结束。${echo ? '<br><br><span class="red">……你的答案，和他写过的一样。</span>' : ''}`, render);
+    setMq('考试结束。XIAOMEI.TXT 已解锁。');
+  };
+}
+
+/* 三个新结局 */
+const FINALS = {
+  true: { name: '交卷', lines: () => [
+    'STOP.EXE　全部会话模式　｜　确认者：04117', '',
+    `会话 ${pad(reg())} …… 解除`, '会话 004960 …… 解除', `会话 ${pad(S.seat)} …… 解除`, '会话 003390 …… 解除', '……', '',
+    '04108：考完了。', '04108：谢谢你帮我交卷。', '04108：帮我跟她说，cendol 要两碗。', '',
+    '会话 NYMX-0001：已解除', '模型目录 /models/04108：已删除', '连接已关闭。', '',
+    '本站访客人数：000000'],
+    epi: () => [
+      ['中央医院　护理记录', '持续二十二年的重复脑电活动停止。生命体征平稳。'],
+      ['郑知序的信箱', '一份解除封存的旧记录，自动寄达。原始时间：2001-06-02。<br>“请不要让爸爸再带同学来了。”'],
+      ['知序教育科技', 'MindPrint 心智模型的发布，无限期延后。'],
+      ['小美（2004 届）', '帖子已删除。<br>私信：“我去吃了 cendol。两碗。”']] },
+  keep: { name: '留下他', lines: () => [
+    '小美收到了一份留言。', '她没有收到 STOP.EXE 的测试结果。', '',
+    '争议隔离：全部样本　｜　交付：暂停', '',
+    '04108：她看到了吗？', '04108：……那我再等等。'],
+    epi: () => [
+      ['小美（2004 届）', '“他还在，对不对？”<br>“我每年都会回来看他。”'],
+      ['访客计数器', '每年 6 月 18 日 23:42，会跳一下。']] },
+  quar: { name: '隔离', lines: () => [
+    '你什么都没有告诉她。', '',
+    '争议隔离：全部样本　｜　交付：暂停，等待人工复核', '',
+    '04108：卷子交出去了。', '04108：……那我什么时候能离开？'],
+    epi: () => [
+      ['小美（2004 届）', '“你还在吗？”<br>“……谢谢你。”<br><span class="small">她不知道那张盘里，还有什么。</span>'],
+      ['知序教育科技', 'MindPrint 心智模型的发布，因“数据合规复核”延后。']] }
+};
+function finalOpts() {
+  if (!s4Ready() || S.final) return [];
+  if (S.askBlame) return [['不会。这一次，你知道自己在决定什么。', () => {
+    dmSay(['……嗯。', '我要按了。'], () => setTimeout(() => { S.final = 'true'; save(); render(); }, 2500));
+  }]];
+  return [
+    ['把他的留言和 STOP.EXE 的测试结果，都交给她', () => {
+      S.askBlame = true; save();
+      dmSay(['……我看完了。', '他说，考完要去吃 cendol。', '他说那个程序会把人放出来，Kelvin 也回来了。', '可是它也会把他删掉。', '……', '我想让他考完。', '你会怪我吗？'], () => renderDM());
+    }, `我找到他留给你的话了。还有，STOP.EXE 我测试过：单一模式放出了 Kelvin。全部模式会解除所有人，也会删掉他的模型。要不要按，由你决定。`],
+    ['只把他的留言交给她', () => {
+      dmSay(['……他写的。', '他说要去吃 cendol。', '他还在，对不对？'], () => setTimeout(() => { S.final = 'keep'; save(); render(); }, 2500));
+    }, '我找到他留给你的话了。'],
+    ['什么都不说', () => {
+      dmSay(['你还在吗？'], () => setTimeout(() => { S.final = 'quar'; save(); render(); }, 2500));
+    }, '……']
+  ];
+}
+function renderFinal() {
+  if ($('finale')) return;
+  const f = FINALS[S.final]; if (!f) return;
+  document.title = f.name;
+  const el = document.createElement('div'); el.id = 'finale';
+  const L = f.lines(), E = f.epi(), step = 0.9;
+  el.innerHTML = `<div class="seq">${L.map((t, i) => `<div style="animation-delay:${i * step}s">${t || '&nbsp;'}</div>`).join('')}</div>
+    <div class="fin-epi">${E.map(([h, b], i) => `<div class="seq"><div style="animation-delay:${(L.length + i * 1.6) * step}s" class="fin-card">${h ? `<b>${h}</b><br>` : ''}${b}</div></div>`).join('')}</div>
+    <div class="seq"><div style="animation-delay:${(L.length + E.length * 1.6 + 1) * step}s;margin-top:22px">— 结局：${f.name} —<br>
+      <span class="small" style="color:#888">你的第 10 题答案：${esc(S.q10)}</span><br>
+      <button id="back4" style="margin-top:12px">回到最后的选择</button>　<button id="reset4" style="margin-top:12px">清除记录，重新开始</button></div></div>`;
+  document.body.appendChild(el);
+  $('reset4').onclick = resetAll;
+  $('back4').onclick = () => { S.final = ''; S.askBlame = false; save(); el.remove(); document.title = `${CFG.school} 校园内联网`; location.hash = '#/floppy'; render(); dmOpen = true; renderDM(); };
+}
+
 
 /* ========================= 机密档案 ========================= */
 R.archive = () => {
