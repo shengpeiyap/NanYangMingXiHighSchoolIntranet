@@ -102,6 +102,9 @@
   .qq-typing { padding:0 8px; height:16px; color:#666; }
   .qq-opts { padding:4px 6px; } .qq-opts button { margin:2px 4px 2px 0; }
   .qq-in { display:flex; gap:4px; padding:4px 6px 6px; } .qq-in input { flex:1; }
+  #boot { position:fixed; inset:0; background:#000; color:#aaa; font-family:"Courier New",monospace; white-space:pre-wrap; padding:30px; z-index:120; font-size:14px; line-height:1.6; }
+  fieldset.adm { border:2px groove #ddd; margin:10px 0; padding:6px 12px; background:#f4f4f4; }
+  fieldset.adm legend { font-weight:bold; color:#0a246a; }
   .restored { border:2px dashed #c00; padding:6px; margin-top:6px; color:#c00; }
 
   /* 坏结局 */
@@ -155,7 +158,7 @@ const DEFAULT = {
   name: null, seat: SEAT, role: 'student',
   sync: 0, integrity: 100,
   exam: [false, false, false], q4: false,
-  dumpSeen: false, binSeen: false, clues: [], blogLogin: false, q4wrong: 0, opened: [], chatOpen: false, chatLog: [], chatAsked: [], chatCreep: false, boardSeen: false, terminal: false, ghost: false, demoDone: false, badEnd: false,
+  dumpSeen: false, binSeen: false, clues: [], blogLogin: false, q4wrong: 0, opened: [], chatOpen: false, chatLog: [], chatAsked: [], chatCreep: false, chatCount: {}, fakeDate: 0, fakeSetAt: 0, exitTries: 0, exitLin: false, adminSeen: false, realClock: false, boardSeen: false, terminal: false, ghost: false, demoDone: false, badEnd: false,
   lastSeen: 0, visits: 0
 };
 
@@ -168,6 +171,7 @@ function parse(raw) {
   const s = Object.assign({}, DEFAULT, o);
   if (!Array.isArray(s.exam)) s.exam = [false, false, false];
   for (const k of ['clues', 'opened', 'chatLog', 'chatAsked']) if (!Array.isArray(s[k])) s[k] = [];
+  if (!s.chatCount || typeof s.chatCount !== 'object') s.chatCount = {};
   s.sync = Number(s.sync) || 0;
   s.integrity = Number(s.integrity); if (isNaN(s.integrity)) s.integrity = 100;
   return s;
@@ -187,6 +191,10 @@ const pad = n => String(n).padStart(6, '0');
 const daysSince = () => Math.floor((Date.now() - new Date(2004, 5, 18)) / 864e5);
 const nowStr = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${d.toTimeString().slice(0,5)}`; };
 const b64 = s => { try { return btoa(s); } catch (e) { return ''; } };
+const DEREG = new Date(2004, 5, 18, 23, 42, 0);       // chen_admin 被注销的那一分钟
+function sysNow() { return S.fakeDate ? new Date(S.fakeDate + (Date.now() - S.fakeSetAt)) : new Date(); }
+const fmtT = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+const beforeDereg = () => sysNow() < DEREG;
 function setMq(t) { mqText = t; $('mq').textContent = t; }
 const syncLabel = () => S.sync >= 25 ? '记忆同步率' : '考试进度';
 function addSync(n) {
@@ -214,7 +222,11 @@ const CLUES = [
   ['chen',   '「公司赞助三十台新电脑，条件是……记录学生的专注度和答题习惯。」　—— 陈老师的博客'],
   ['secret', '「今晚我会把头环接上主机，用我自己的脑波当桥。」　—— 陈老师的私人文章《给子轩》'],
   ['quota',  '「有效样本须对应独立身份；重复测量不得计入验收数量。」　—— 合约附件第 7 条'],
-  ['letter', '「这件事，我只跟子轩一个人说过。系统不可能知道。」　—— 陈老师没寄出的信']
+  ['letter', '「这件事，我只跟子轩一个人说过。系统不可能知道。」　—— 陈老师没寄出的信'],
+  ['mail',   '「请勿中断设备电源。远端维护将于今晚接手。」　—— 陈老师的信箱，寄件人：郑总'],
+  ['sched',  '「2004-06-18 23:42　注销账号 chen_admin　建立者：zhixu_remote」　—— 管理后台，计划任务'],
+  ['model',  '「管理员测试：作文栏输入 1 条｜回复来源：模型 04108」　—— 管理后台，系统日志'],
+  ['upload', '「IMG_0618.JPG｜上传账号：lin04108｜来源：本机进程 nymx_exam.exe」　—— 管理后台，系统日志']
 ];
 function toast(t) {
   const d = document.createElement('div'); d.className = 'toast'; d.innerHTML = t;
@@ -231,28 +243,33 @@ function hurt(n, msg) {
   if (msg) setMq(msg);
 }
 
+/* 对话框排队：一次只显示一个，关掉一个才出下一个 */
+const dlgQ = [];
+function dlgShow(build) { if (document.querySelector('.dlg-mask')) dlgQ.push(build); else build(); }
+function dlgNext() { setTimeout(() => { if (!document.querySelector('.dlg-mask') && dlgQ.length) dlgQ.shift()(); }, 60); }
+
 /* 多按钮对话框：btns = [[文字, 回调], ...] */
-function dialog2(title, body, btns) {
+function dialog2(title, body, btns) { dlgShow(() => {
   const d = document.createElement('div');
   d.className = 'dlg-mask';
   d.innerHTML = `<div class="dlg"><div class="dlg-t">${title}<span>×</span></div>
     <div class="dlg-b">${body}</div><div class="dlg-f">${btns.map((b, i) => `<button data-i="${i}">${b[0]}</button>`).join(' ')}</div></div>`;
-  d.querySelectorAll('.dlg-f button').forEach(el => el.onclick = () => { d.remove(); const f = btns[+el.dataset.i][1]; f && f(); });
-  d.querySelector('.dlg-t span').onclick = () => { d.remove(); const f = btns[btns.length - 1][1]; f && f(); };
+  d.querySelectorAll('.dlg-f button').forEach(el => el.onclick = () => { d.remove(); const f = btns[+el.dataset.i][1]; f && f(); dlgNext(); });
+  d.querySelector('.dlg-t span').onclick = () => { d.remove(); const f = btns[btns.length - 1][1]; f && f(); dlgNext(); };
   document.body.appendChild(d);
-}
+}); }
 
-function dialog(title, body, cb, btn = '确定') {
+function dialog(title, body, cb, btn = '确定') { dlgShow(() => {
   const d = document.createElement('div');
   d.className = 'dlg-mask';
   d.innerHTML = `<div class="dlg"><div class="dlg-t">${title}<span>×</span></div>
     <div class="dlg-b">${body}</div><div class="dlg-f"><button>${btn}</button></div></div>`;
-  const close = () => { d.remove(); cb && cb(); };
+  const close = () => { d.remove(); cb && cb(); dlgNext(); };
   d.querySelector('button').onclick = close;
   d.querySelector('.dlg-t span').onclick = close;
   document.body.appendChild(d);
   d.querySelector('button').focus();
-}
+}); }
 
 /* ====================== 路由与外框 ====================== */
 function route() {
@@ -268,14 +285,14 @@ function renderNav() {
     <span class="who">考生：<b>${S.sync >= 45 && Math.random() < .25 ? '林子轩' : esc(S.name)}</b>（座号 ${pad(S.seat)}）｜身份：${esc(S.role)}｜${syncLabel()}：<b class="red">${S.sync}%</b>｜数据完整性：${S.integrity}%</span>
     <a href="#/home">公告栏</a><a href="#/exam">期末考试</a>${navItem('board', '#/board', '留言板')}${navItem('tools', '#/tools', '工具箱')}${navItem('chat', '#/chat', '聊天室')}
     ${S.terminal ? '<a href="#/terminal" style="color:#c00">系统调试台</a>' : ''}
-    <a href="#/notes">草稿纸</a><a href="#/archive">机密档案</a><a href="#" id="logout">登出</a>`;
+    ${S.role === 'chen_admin' ? '<a href="#/admin" style="color:#c00">管理后台</a>' : ''}<a href="#/notes">草稿纸</a><a href="#/archive">机密档案</a><a href="#" id="logout">登出</a>`;
   $('logout').onclick = e => { e.preventDefault(); dialog('考场纪律', '⛔ 交卷前严禁离席。'); };
 }
 
 function renderFoot() {
-  const ms = Date.now() - EPOCH;
+  const ms = sysNow() - EPOCH;
   const d = Math.floor(ms / 864e5), h = Math.floor(ms / 36e5) % 24;
-  $('foot').innerHTML = `本站访客人数：<b>${pad(S.name ? S.seat : S.seat - 1)}</b>　｜　服务器运行时间：${d.toLocaleString()} 天 ${h} 小时<br>
+  $('foot').innerHTML = `本站访客人数：<b>${pad(S.name ? S.seat : S.seat - 1)}</b>　｜　服务器运行时间：${ms < 0 ? '尚未上线' : `${d.toLocaleString()} 天 ${h} 小时`}<br>
     <!-- counter.asp by 04108 -->© 2004 ${CFG.school} 电脑组 ｜ ${CFG.domain} ｜ 维护：陈老师（分机 213）`;
 }
 
@@ -572,7 +589,7 @@ R.terminal = () => {
   $('main').innerHTML = `<h3>🖥 系统调试台</h3>
     <div class="small">会话数据（实时）：</div><div class="json" id="json">${jsonView()}</div>
     <div class="term" id="term">${termLog.join('\n')}</div>
-    <div class="term-in">nymx:/srv/exam$&nbsp;<input id="tin" autocomplete="off" autocapitalize="off" spellcheck="false"></div>`;
+    <div class="term-in">${suPending ? '密码：' : 'nymx:/srv/exam$'}&nbsp;<input id="tin" type="${suPending ? 'password' : 'text'}" autocomplete="off" autocapitalize="off" spellcheck="false"></div>`;
   const t = $('term'); t.scrollTop = t.scrollHeight;
   $('tin').onkeydown = e => { if (e.key === 'Enter') { runTerm(e.target.value); } };
   $('tin').focus();
@@ -580,7 +597,8 @@ R.terminal = () => {
 
 function roleCheck(v) {
   if (v === 'student') return { ok: true, msg: '身份已设为 student。' };
-  if (v === 'chen_admin') return { ok: false, msg: '拒绝：账号 chen_admin 已于 2004-06-18 23:42 注销。' };
+  if (v === 'chen_admin') return beforeDereg() ? { ok: true, msg: '欢迎回来，陈老师。' }
+    : { ok: false, msg: `拒绝：账号 chen_admin 已于 2004-06-18 23:42 注销。（当前系统时间：${fmtT(sysNow())}）` };
   if (b64(v) === ENC.ghost) {
     if (!S.q4) return { ok: false, msg: '白名单校验失败：' + syncLabel() + '不足（请先完成第 4 题）。' };
     return { ok: true, ghost: true, msg: '……白名单校验通过。欢迎回来，子轩。' };
@@ -588,13 +606,22 @@ function roleCheck(v) {
   return { ok: false, msg: '未知身份：' + v };
 }
 
+let suPending = false;
 function runTerm(raw) {
+  if (suPending) {
+    suPending = false;
+    tprint('密码：' + '*'.repeat(Math.min(raw.length, 8)));
+    if (b64(raw.trim()) !== ENC.admin) tprint('su: 密码错误。', 'bad');
+    else if (!beforeDereg()) tprint(`su: 账号 chen_admin 已于 2004-06-18 23:42 注销。（当前系统时间：${fmtT(sysNow())}）`, 'bad');
+    else { S.role = 'chen_admin'; save(); tprint('欢迎回来，陈老师。（【管理后台】已开放）', 'ok'); }
+    render(); return;
+  }
   const line = raw.trim(); if (!line) return;
   tprint('nymx:/srv/exam$ ' + line);
   const [cmd, ...rest] = line.split(/\s+/); const arg = rest.join(' ');
   switch (cmd.toUpperCase()) {
     case 'HELP':
-      tprint('HELP            显示本说明\nSTATUS          查看考生状态\nWHOAMI          查看当前身份\nINSPECT <题号>   查看考题的隐藏属性（例：INSPECT q4）\nSET <字段>=<值>  修改会话字段（例：SET role=student）\n                可用身份：student | chen_admin（已注销）| GHOST_xxxxx（底层白名单，系统保留）\nCLEAR           清屏\nEXIT            离开考场');
+      tprint('HELP            显示本说明\nSTATUS          查看考生状态\nWHOAMI          查看当前身份\nINSPECT <题号>   查看考题的隐藏属性（例：INSPECT q4）\nSET <字段>=<值>  修改会话字段（例：SET role=student）\n                可用身份：student | chen_admin（已注销）| GHOST_xxxxx（底层白名单，系统保留）\nSU <账号>        切换账号（例：SU chen_admin）\nDATE [YYYY-MM-DD HH:MM]  查看或修改系统时间（DATE RESET 可恢复）\nCLEAR           清屏\nEXIT [-f]       离开考场');
       break;
     case 'STATUS':
       tprint(`考生 ${S.name} ｜ 座号 ${pad(S.seat)} ｜ 身份 ${S.role} ｜ 同步率 ${S.sync}% ｜ 完整性 ${S.integrity}%`, 'ok'); break;
@@ -609,6 +636,7 @@ function runTerm(raw) {
       const m = arg.match(/^(\w+)\s*=\s*(.+)$/);
       if (!m) { tprint('格式：SET 字段=值', 'bad'); break; }
       const k = m[1], v = m[2].trim().replace(/^["']|["']$/g, '');
+      if (k === 'role' && v === 'chen_admin') { tprint('拒绝：管理员身份须以 SU 指令登录。', 'bad'); break; }
       if (k === 'role') {
         const r = roleCheck(v);
         if (r.ok) { S.role = v; if (r.ghost) S.ghost = true; tprint(r.msg, 'ok'); }
@@ -625,7 +653,28 @@ function runTerm(raw) {
       break;
     }
     case 'CLEAR': termLog = []; break;
-    case 'EXIT': tprint('考场纪律：交卷前严禁离席。', 'bad'); break;
+    case 'EXIT':
+      if (/^(-f|--force|-force)$/i.test(arg)) { forceExit(); return; }
+      if (S.role === 'chen_admin') { S.role = 'student'; save(); tprint('已登出 chen_admin。', 'ok'); break; }
+      tprint('考场纪律：交卷前严禁离席。', 'bad'); break;
+    case 'SU':
+      if (arg.toLowerCase() === 'chen_admin') { suPending = true; tprint('su chen_admin'); }
+      else if (!arg || arg.toLowerCase() === 'student') { S.role = 'student'; save(); tprint('已切换为 student。', 'ok'); }
+      else tprint('su: 用户不存在：' + arg, 'bad');
+      break;
+    case 'DATE': {
+      if (!arg) { tprint('当前系统时间：' + fmtT(sysNow()) + (S.fakeDate ? '　（已手动修改）' : '')); break; }
+      if (/^reset$/i.test(arg)) { S.fakeDate = 0; save(); tprint('系统时间已恢复：' + fmtT(sysNow()), 'ok'); break; }
+      const m = arg.match(/^(\d{4})-(\d{1,2})-(\d{1,2})(?:\s+(\d{1,2}):(\d{2}))?$/);
+      if (!m) { tprint('格式：DATE YYYY-MM-DD [HH:MM]　或　DATE RESET', 'bad'); break; }
+      const d = new Date(+m[1], +m[2] - 1, +m[3], m[4] ? +m[4] : 0, m[5] ? +m[5] : 0);
+      if (isNaN(d) || d.getFullYear() < 2004 || d > new Date()) { tprint('拒绝：系统时间超出允许范围（2004-01-01 至今）。', 'bad'); break; }
+      S.fakeDate = d.getTime(); S.fakeSetAt = Date.now(); save();
+      tprint('系统时间已修改为：' + fmtT(d), 'ok');
+      tprint('已挂载该时刻的历史会话快照。账号权限与档案索引，将按此时刻重建。');
+      tprint('⚠ 教务处公告：严禁修改系统时间。', 'bad');
+      break;
+    }
     default: tprint('未知指令：' + cmd + '　（输入 HELP 查看说明）', 'bad');
   }
   render();
@@ -745,7 +794,7 @@ R['~lin'] = () => {
     <h4>【相册】</h4>
     <canvas id="photo" width="480" height="320" style="max-width:100%;border:4px solid #fff" title="IMG_0618.JPG｜2004-06-18 22:40"></canvas><br>
     <span class="small" style="color:#9c9">电脑社合照（最后一张）　上传者：林子轩　上传时间：2004-06-18 22:41</span><br>
-    <button id="pprop">查看属性</button>　图片增强（亮度）：<input id="pbr" type="range" min="1" max="8" step="0.5" value="1" style="vertical-align:middle">
+    <button id="pprop">查看属性</button>　<button id="pzoom">🔍 放大</button>　图片增强（曝光）：<input id="pbr" type="range" min="0" max="10" step="1" value="0" style="vertical-align:middle">
 
     <h4>【我的周记】</h4>
     <div class="gb"><b>2004-03-08</b>　陈老师在做一个“心智评估系统”，模拟考的时候戴脑电头环，记录专注度和答题习惯。全校只有我自愿当受试者。戴上去像外星人，小美笑了我一整节课。</div>
@@ -778,9 +827,10 @@ R['~lin'] = () => {
       `文件名：IMG_0618.JPG<br>拍摄时间：2004-06-18 22:40<br>相机：Canon PowerShot A70<br>拍摄者：陈国伟<br>备注：最后一次社团合照。<span class="red">人数好像多了一个。</span>`);
     $('pbr').oninput = e => {
       const v = +e.target.value;
-      $('photo').style.filter = `brightness(${v}) contrast(${1 + v * 0.35})`;
-      if (v >= 5) clue('photo');
+      exposePhoto($('photo'), v);
+      if (v >= 6) clue('photo');       // 曝光调到看得清楚的范围，才记下来
     };
+    $('pzoom').onclick = () => zoomPhoto($('photo'));
   }
 };
 
@@ -789,7 +839,7 @@ function drawPhoto(c) {
   const x = c.getContext('2d'), W = c.width, H = c.height;
   const g = x.createLinearGradient(0, 0, 0, H); g.addColorStop(0, '#16181f'); g.addColorStop(1, '#0b0c10');
   x.fillStyle = g; x.fillRect(0, 0, W, H);
-  // 黑板，暗字只有调亮才看得见
+  // 黑板，暗字只有调高曝光才看得见
   x.fillStyle = '#121412'; x.fillRect(130, 22, 220, 86);
   x.fillStyle = '#141614'; x.font = 'bold 22px monospace'; x.textAlign = 'center';
   x.fillText('SAMPLE 0001', 240, 58); x.fillText('/ 5000', 240, 88);
@@ -809,13 +859,41 @@ function drawPhoto(c) {
     }
     x.globalAlpha = 1;
   });
-  // 噪点
+  // 噪点（黑板区域不加，调曝光时字才不会被噪点吃掉）
   const img = x.getImageData(0, 0, W, H), d = img.data;
-  for (let i = 0; i < d.length; i += 4) { const n = (Math.random() - .5) * 8; d[i] += n; d[i+1] += n; d[i+2] += n; }
+  for (let i = 0; i < d.length; i += 4) {
+    const px = (i / 4) % W, py = Math.floor(i / 4 / W);
+    if (px >= 130 && px < 350 && py >= 22 && py < 108) continue;
+    const n = (Math.random() - .5) * 8; d[i] += n; d[i+1] += n; d[i+2] += n;
+  }
   x.putImageData(img, 0, 0);
   // 数码相机日期戳
   x.fillStyle = '#ff9a30'; x.font = '15px monospace'; x.textAlign = 'right';
   x.fillText("'04 06 18  22:40", W - 12, H - 10);
+  photoBase = x.getImageData(0, 0, W, H);
+}
+let photoBase = null;
+/* 曝光：把最暗的那一段亮度拉开，黑板上的字会在 6 以上清楚浮现 */
+function exposePhoto(c, v) {
+  const x = c.getContext('2d');
+  if (!photoBase) return;
+  if (!v) { x.putImageData(photoBase, 0, 0); return; }
+  const src = photoBase.data, out = x.createImageData(photoBase.width, photoBase.height), d = out.data;
+  const gain = 1 + v * 4, black = 15;
+  for (let i = 0; i < src.length; i += 4) {
+    for (let k = 0; k < 3; k++) d[i + k] = Math.max(0, Math.min(255, (src[i + k] - black) * gain));
+    d[i + 3] = 255;
+  }
+  x.putImageData(out, 0, 0);
+}
+function zoomPhoto(c) {
+  const d = document.createElement('div');
+  d.className = 'dlg-mask';
+  d.innerHTML = `<div class="dlg" style="width:min(980px,96vw)"><div class="dlg-t">IMG_0618.JPG<span>×</span></div>
+    <div style="background:#000;padding:8px;max-height:80vh;overflow:auto"><img src="${c.toDataURL()}" style="width:960px;max-width:none;image-rendering:pixelated;display:block"></div>
+    <div class="dlg-f" style="padding-top:8px"><button>关闭</button></div></div>`;
+  d.querySelector('button').onclick = d.querySelector('.dlg-t span').onclick = () => { d.remove(); dlgNext(); };
+  document.body.appendChild(d);
 }
 
 /* ===================== 陈老师的博客 /~chen ===================== */
@@ -908,7 +986,7 @@ function printPreview() {
       <div class="meta">3 楼　｜　chen_admin（已注销）　｜　2004-06-19 02:14</div>
       子轩不是在考试　是它在考<br>人数不够　它就去外面找<br>我删不掉自己　权限没了<br>别让数字到 100<br>只有一个名字它不敢删　你已经见过了
     </div></div><div class="dlg-f" style="padding-top:10px"><button>关闭</button></div></div>`;
-  d.querySelector('button').onclick = d.querySelector('.dlg-t span').onclick = () => d.remove();
+  d.querySelector('button').onclick = d.querySelector('.dlg-t span').onclick = () => { d.remove(); dlgNext(); };
   document.body.appendChild(d);
 }
 
@@ -931,30 +1009,41 @@ const TOPICS = [
   { id: 'num',   label: `我是 ${pad(SEAT)} 号。`, cond: () => !asked('num'),
     lines: () => ['……又一个。', '对不起。', '不要在这里待太久。它会记住你。'] },
   { id: 'start', label: '我该从哪里开始？', keep: true, cond: () => !has('white'),
-    lines: () => ['公告。', '老师写的东西，不一定是写给学生看的。', '有些字是白色的。'] },
+    lines: () => [['老师在公告里写过一大段话。', '可是你那里看起来，是不是一片空白？'], ['试试把那片空白选起来。']] },
   { id: 'calc',  label: '“学号乘以分机号”是什么意思？', keep: true, cond: () => has('white') && !S.dumpSeen,
-    lines: () => ['老师的计算器。', '他每天晚上都坐在机房，按同一串数字。', '在工具箱里。'] },
+    lines: () => [['老师的计算器。', '他每天晚上都坐在机房，按同一串数字。'], ['在工具箱里。学号，乘以他的分机号。']] },
   { id: 'b64',   label: '计算器吐出来的乱码是什么？', keep: true, cond: () => S.dumpSeen && !S.terminal,
-    lines: () => ['Base64。', '旁边那个校验工具是我写的。很好用吧。', '还原出来的东西，贴进教务指令栏。'] },
+    lines: () => [['那不是乱码。', '是一种很老的编码方式。'], ['旁边那个校验工具是我写的，很好用吧。', '还原出来的东西，是一条指令。贴进教务指令栏。']] },
   { id: 'q4',    label: '第 4 题的答案是什么？', keep: true, cond: () => S.exam.every(Boolean) && !S.q4,
-    lines: () => ['我不知道。', '那天晚上，我已经不在机房了。', '可是老师在。'].concat(
-      S.terminal ? ['你有调试台。题目里藏着的东西，INSPECT 一下。'] : ['去找老师留下的东西。他的工具，或者他的博客。']) },
-  { id: 'chen',  label: '陈老师在哪里？', cond: () => S.q4 && !asked('chen'),
-    lines: () => ['他在里面。', '比我更里面。', '他在留言板写过东西，屏幕上看不到。', '打印出来。屏幕上的字会骗人，纸不会。'] },
+    lines: () => [['我不知道。', '那天晚上，我已经不在机房了。', '可是老师在。'],
+      [S.terminal ? '题目里藏着东西，网页上看不到。你有调试台。' : '去找老师留下的东西。他的工具，或者他的博客。'],
+      [S.terminal ? 'INSPECT q4。' : '他的博客有作者登录。密码提示，我在周记里写过。']] },
+  { id: 'chen',  label: '陈老师在哪里？', keep: true, cond: () => S.q4 && !has('post3'),
+    lines: () => [['他在里面。', '比我更里面。', '他在留言板写过东西，可是屏幕上看不到。'], ['屏幕上的字会骗人，纸不会。']] },
   { id: 'name',  label: '“只有一个名字它不敢删”是什么？', keep: true, cond: () => has('post3') && !S.ghost,
-    lines: () => ['我留的。', '我本来想关掉它。来不及了。', '只来得及留一个名字。', '我的作品，你去看过了吗？'] },
+    lines: () => [['我留的。', '我本来想关掉它。来不及了。'], ['只来得及留一个名字。', '我的作品，你去看过了吗？']] },
   { id: 'heart', label: '你的心脏……', cond: () => has('lin') && !asked('heart'),
     lines: () => ['不要跟小美说。', '……她现在应该知道了吧。', '二十二年了。'] },
   { id: 'quota', label: '五千份是什么？', cond: () => has('quota') && !asked('quota'),
     lines: () => ['合约。', '它在数人。', `你是第 ${SEAT} 个。`, '不对，有效的只有', '[连接中断]'] },
   { id: 'letter',label: '陈老师以为，系统里的人是你。', cond: () => has('letter') && !asked('letter'),
     lines: () => ['生日礼物。', '那是我问的。', '……应该是我吧。', '有时候，我想不起小美的脸。', '可是我记得 cendol 的味道。这样还算是我吗？'] },
+  { id: 'time',  label: '有办法用陈老师的账号吗？', keep: true, cond: () => S.terminal && !S.adminSeen,
+    lines: () => [['老师的账号，是 23:42 被注销的。', '在那之前，它还活着。'], ['公告里有一条规定，你还记得吗？', '……你知道为什么要“严禁”吗？'], ['回到 23:42 之前。调试台的 DATE。']] },
+  { id: 'zhixu', label: 'zhixu_remote 是谁？', cond: () => has('sched') && !asked('zhixu'),
+    lines: () => ['那天晚上，机房里不只有老师。', '有人从外面连进来。', '老师倒下以后，键盘还在打字。'] },
+  { id: 'exit',  label: '我出不去。', cond: () => S.exitTries >= 1 && !asked('exit'),
+    lines: () => ['我知道。', '关掉网页也没用。它会等你回来。', '想离开考场，要先让它找不到你。'] },
+  { id: 'model', label: '陈老师收到的回答，来源是“模型 04108”。', cond: () => has('model') && !asked('model'),
+    lines: () => ['……模型。', '所以那天下午回答老师的，不是我。', '……', '那现在跟你说话的，是谁？'] },
+  { id: 'upload',label: '你相册里那张照片，是谁上传的？', cond: () => has('upload') && !asked('upload'),
+    lines: () => ['不是我。', '那时候我在医院。', '它用我的账号。', '它一直在用我的账号。'] },
   { id: 'xm',    label: '小美的软盘里有什么？', cond: () => has('bin') && !asked('xm'),
     lines: () => ['考完再看。', '我跟她说好的。', '你帮我跟她说', '[04108 已离线]'] }
 ];
-const KEYWORDS = [['小美','xm'],['软盘','xm'],['心脏','heart'],['5000','quota'],['五千','quota'],['合约','quota'],
+const KEYWORDS = [['账号','time'],['登录','time'],['登入','time'],['时间','time'],['模型','model'],['照片','upload'],['相册','upload'],['上传','upload'],['小美','xm'],['软盘','xm'],['心脏','heart'],['5000','quota'],['五千','quota'],['合约','quota'],
   ['老师','chen'],['陈','chen'],['答案','q4'],['第4题','q4'],['第四题','q4'],['名字','name'],['白名单','name'],
-  ['乱码','b64'],['base64','b64'],['计算器','calc'],['开始','start'],['提示','start'],['你是谁','who'],['生日','letter']];
+  ['乱码','b64'],['base64','b64'],['计算器','calc'],['开始','start'],['提示','start'],['你是谁','who'],['生日','letter'],['zhixu','zhixu'],['知序','zhixu'],['出去','exit'],['离开','exit']];
 const FILLER = ['……', '我听不清楚。', '考场里不能聊天。', '灯又亮了。', '你再说一次？', '我在写最后一题。'];
 
 let chatBusy = false, chatTimer = null;
@@ -976,19 +1065,28 @@ function linSay(lines, done) {
   };
   next();
 }
+/* 分层提示：同一个问题问第二、三次，才会说得更明白 */
+function topicLines(tp) {
+  const L = tp.lines();
+  if (typeof L[0] === 'string') return L;
+  const n = S.chatCount[tp.id] || 0;
+  S.chatCount[tp.id] = n + 1; save();
+  return L[Math.min(n, L.length - 1)];
+}
+const moreTiers = tp => { const L = tp.lines(); return typeof L[0] !== 'string' && (S.chatCount[tp.id] || 0) > 0 && (S.chatCount[tp.id] || 0) < L.length; };
 function chatAsk(id) {
   const tp = TOPICS.find(x => x.id === id);
   if (!tp || chatBusy) return;
   chatPush('me', tp.label);
   if (!asked(id)) { S.chatAsked.push(id); save(); }
-  linSay(tp.lines());
+  linSay(topicLines(tp));
 }
 function chatFree(text) {
   text = text.trim(); if (!text || chatBusy) return;
   chatPush('me', text);
   const low = text.toLowerCase().replace(/\s/g, '');
   const hit = KEYWORDS.find(([k, id]) => low.includes(k) && TOPICS.find(x => x.id === id && x.cond()));
-  if (hit) { if (!asked(hit[1])) { S.chatAsked.push(hit[1]); save(); } linSay(TOPICS.find(x => x.id === hit[1]).lines()); }
+  if (hit) { if (!asked(hit[1])) { S.chatAsked.push(hit[1]); save(); } linSay(topicLines(TOPICS.find(x => x.id === hit[1]))); }
   else linSay([FILLER[Math.floor(Math.random() * FILLER.length)]]);
 }
 function chatHtml() {
@@ -1002,7 +1100,7 @@ function refreshChat() {
   if (!chatBusy && $('qtyping')) $('qtyping').textContent = '';
   const opts = TOPICS.filter(x => x.cond());
   $('qopts').innerHTML = chatBusy ? '<span class="small">……</span>'
-    : (opts.length ? opts.map(x => `<button data-t="${x.id}">${esc(x.label)}</button>`).join('') : '<span class="small">（暂时没有想问的。）</span>');
+    : (opts.length ? opts.map(x => `<button data-t="${x.id}">${esc(x.label)}${moreTiers(x) ? '（再问一次）' : ''}</button>`).join('') : '<span class="small">（暂时没有想问的。）</span>');
   $('qopts').querySelectorAll('button').forEach(b => b.onclick = () => chatAsk(b.dataset.t));
 }
 R.chat = () => {
@@ -1012,7 +1110,7 @@ R.chat = () => {
       <div class="qq-typing small" id="qtyping"></div>
       <div class="qq-opts" id="qopts"></div>
       <div class="qq-in"><input id="qin" placeholder="输入消息……" autocomplete="off"><button id="qsend">发送</button></div></div>`;
-  const send = () => { const v = $('qin').value; $('qin').value = ''; chatFree(v); };
+  const send = () => { if (chatBusy) return; const v = $('qin').value; $('qin').value = ''; chatFree(v); };   // 对方还在打字时，保留你的输入
   $('qsend').onclick = send;
   $('qin').onkeydown = e => { if (e.key === 'Enter') send(); };
   refreshChat();
@@ -1031,10 +1129,10 @@ function navItem(key, href, label) {
 }
 function checkUnlocks() {
   for (const k of ['board', 'tools']) {
-    if (document.querySelector('.dlg-mask')) break;   // 一次只弹一个对话框
     if (OPEN[k]() && !S.opened.includes(k)) {
       S.opened.push(k); save();
-      setTimeout(() => dialog('系统恢复', `正在恢复数据……<div class="pbar"><i></i></div>【${OPEN_NAME[k]}】已恢复上线。`), 300);
+      toast(`🛠 正在恢复数据……<div class="pbar"><i></i></div>【${OPEN_NAME[k]}】已恢复上线。`);
+      setMq(`【${OPEN_NAME[k]}】已恢复上线。`);
       break;
     }
   }
@@ -1047,6 +1145,90 @@ function checkUnlocks() {
     }, 8000);
   }
 }
+/* ===================== 强制离席：EXIT -f ===================== */
+function forceExit() {
+  S.exitTries = (S.exitTries || 0) + 1; addSync(3);
+  if (S.role === 'chen_admin') S.role = 'student';
+  save();
+  const n = S.exitTries;
+  const o = document.createElement('div'); o.id = 'boot'; document.body.appendChild(o);
+  const lines = ['正在强制结束考试会话……', '正在保存考生数据……　完成', '正在关闭 nymx_exam.exe……', '', '',
+    'NYMX EXAM SERVER  build 2004.06.18', '正在启动……', `已恢复 1 个未结束的考试会话：${pad(S.seat)}`];
+  let i = 0; document.title = '……';
+  const step = () => {
+    if (i < lines.length) { o.textContent += lines[i++] + '\n'; setTimeout(step, i === 3 ? 1800 : 650); return; }
+    setTimeout(() => {
+      o.remove(); document.title = `${CFG.school} 校园内联网`; termLog = [];
+      location.hash = '#/home'; render();
+      dialog('考场', n === 1 ? `欢迎回来，${esc(S.name)} 同学。<br>你的考试尚未结束。`
+        : n === 2 ? '又见面了。'
+        : `离席记录：${n} 次。<br><span class="red">你还要试几次？</span>`);
+      setMq(`离席记录：${n} 次。离席时间已计入${syncLabel()}。`);
+      if (n >= 3 && S.chatOpen && !S.exitLin) setTimeout(() => {
+        S.exitLin = true; S.chatLog.push(['lin', '别再试了。', hhmm()], ['lin', '我试过四千一百零八次。', hhmm()]); save();
+        toast('🔔 04108 给你发来一条消息。');
+      }, 4000);
+    }, 1200);
+  };
+  step();
+}
+
+/* ===================== 管理后台：只在 2004-06-18 23:42 之前能进 ===================== */
+const ADMIN_LOG = [
+  [new Date(2004, 5, 17, 19, 40), '受试者 04108 登入机房终端 PC-03'],
+  [new Date(2004, 5, 17, 22, 15), '题库上传：37 / 40'],
+  [new Date(2004, 5, 17, 23, 6),  '头环信号：受试者 04108 心率异常（138 bpm）'],
+  [new Date(2004, 5, 17, 23, 9),  '电源：旧实验楼三楼配电箱跳闸'],
+  [new Date(2004, 5, 17, 23, 10), '受试者 04108 信号丢失'],
+  [new Date(2004, 5, 18, 8, 0),   '考试系统上线。考场名单载入 801 人（含 04108）'],
+  [new Date(2004, 5, 18, 15, 20), '管理员测试：作文栏输入 1 条｜回复来源：<b>模型 04108</b>'],
+  [new Date(2004, 5, 18, 18, 5),  '远端连线：<b>zhixu_remote</b> 已登入'],
+  [new Date(2004, 5, 18, 22, 30), '管理员执行 bridge.exe --test（桥接测试）'],
+  [new Date(2004, 5, 18, 22, 41), '文件上传：IMG_0618.JPG → /~lin/album｜上传账号：lin04108｜来源：<b>本机进程 nymx_exam.exe</b>'],
+  [new Date(2004, 5, 18, 23, 15), '管理员执行 bridge.exe --src=chen --dst=04108']
+];
+const ADMIN_MAIL = [
+  [new Date(2004, 2, 21, 10, 12), '附件第 7 条', '陈老师：附件第 7 条是本公司的标准条款。系统具备自动扩展采集范围的功能，样本数的事，您不必操心。'],
+  [new Date(2004, 5, 16, 9, 30),  '关于受试者 04108', '陈老师：听说贵校受试者 04108 健康状况不佳。提醒您，受试者中途退出，其数据将视为无效样本，赞助款项须按合约退回。'],
+  [new Date(2004, 5, 18, 18, 5),  '紧急', '陈老师：数据中心已收到 04108 的完整脑波档案。<b>请勿中断设备电源。</b>远端维护将于今晚接手。']
+];
+const JOB_AT = new Date(2004, 5, 18, 18, 6);
+R.admin = () => {
+  if (S.role !== 'chen_admin') { $('main').innerHTML = '<h3>🔒 管理后台</h3><p>权限不足。</p>'; return; }
+  if (!S.adminSeen) { S.adminSeen = true; save(); }
+  const now = sysNow(), live = now >= EPOCH;
+  const logs = ADMIN_LOG.filter(x => x[0] <= now), mails = ADMIN_MAIL.filter(x => x[0] <= now);
+  $('main').innerHTML = `<h3>🛠 NYMX 考试系统管理后台</h3>
+    <p>登录身份：<b>chen_admin</b>　｜　当前系统时间：<b id="admclock">${fmtT(now)}</b><br>
+      考试系统：${live ? '<span class="done">运行中</span>' : '待上线（预定 2004-06-18 08:00）'}　｜　考场名单：${live ? '801 人' : '尚未载入'}<br>
+      <span class="small">当前挂载：历史会话快照（OLD-SRV01）。账号权限与档案索引，按所选时刻重建。</span></p>
+    <fieldset class="adm"><legend>系统日志</legend>${logs.length ? logs.map(x => `<div><span class="small">${fmtT(x[0])}</span>　${x[1]}</div>`).join('') : '<span class="small">（无记录）</span>'}</fieldset>
+    <fieldset class="adm"><legend>管理员信箱（${mails.length}）</legend>${mails.length ? mails.map(x => `<div class="post"><div class="meta">${fmtT(x[0])}　｜　寄件人：郑总（知序教育科技）　｜　主旨：${x[1]}</div>${x[2]}</div>`).join('') : '<span class="small">（没有邮件）</span>'}</fieldset>
+    <fieldset class="adm"><legend>计划任务</legend>${now >= JOB_AT
+      ? '<div>2004-06-18 23:42　注销账号 chen_admin　｜　建立者：<b class="red">zhixu_remote</b>　｜　状态：等待执行</div>'
+      : '<span class="small">（无排程）</span>'}</fieldset>
+    <p class="small">※ 修改系统时间可能导致数据异常。</p>`;
+  if (mails.length === ADMIN_MAIL.length) clue('mail', 3);
+  if (now >= new Date(2004, 5, 18, 15, 20)) clue('model', 2);
+  if (now >= new Date(2004, 5, 18, 22, 41)) clue('upload', 2);
+  if (now >= JOB_AT) clue('sched', 3);
+};
+
+/* 每秒检查系统时间：一过 23:42，管理员会话立刻被踢出 */
+let lastMin = -1;
+setInterval(() => {
+  if (!S.name || S.badEnd) return;
+  if (S.role === 'chen_admin' && !beforeDereg()) {
+    S.role = 'student'; save();
+    document.body.style.filter = 'invert(1)'; setTimeout(() => { document.body.style.filter = ''; }, 250);
+    dialog('⛔ 会话已终止', '账号 <b>chen_admin</b> 已于 2004-06-18 23:42 注销。<br><span class="small">注销来源：zhixu_remote</span>', () => { location.hash = '#/home'; });
+    render(); return;
+  }
+  if (!S.realClock && new Date().getFullYear() <= 2004) { S.realClock = true; save(); setMq(`系统时间：${fmtT(new Date())}。……欢迎回来，陈老师？`); }
+  const mn = sysNow().getMinutes();
+  if (route() === 'admin' && mn !== lastMin) { lastMin = mn; render(); }
+}, 1000);
+
 R.closed = () => {
   $('main').innerHTML = `<h3>🚧 系统维护中</h3><p>此版块的数据正在恢复，请稍后再试。</p>
     <p class="small">恢复进度：<span class="glitch">██░░░░░░░░</span></p>`;
@@ -1081,12 +1263,18 @@ ${CFG.school} - 特殊学籍归档文件（绝密）
     <p class="small" style="text-align:center;margin-top:24px">（想重新开始，请清除本站的浏览器数据，或 <a href="#" id="reset">点此重置</a>。）</p>`;
   setTimeout(() => {
     const l = $('leak'); if (!l) return;
+    const ev = has('mail') && has('sched');
     l.innerHTML = `<div class="dump" style="margin-top:14px">[知序数据中心｜校外接收端]
 节点 OLD-SRV01 回传一条记录……
 新增待处理样本：${pad(S.seat)}　（来源：考场名单注销）
-状态：<span class="cn">等待交付</span></div>
+状态：<span class="cn">等待交付</span>${ev ? `
+
+……检测到该考生持有远端连线记录（郑总邮件 ×3、计划任务 ×1）。
+状态更新：<span class="cn">交付已暂停，等待人工审核。</span>` : ''}</div>
+      ${ev ? '<p style="text-align:center;margin-top:14px">你带走了证据。它第一次停了下来。</p>'
+           : '<p class="small" style="text-align:center;margin-top:14px">（也许，还有什么东西是你可以带走的。）</p>'}
       <p style="text-align:center;margin-top:18px"><b>— Demo 阶段一完成 —</b></p>`;
-    setMq(`知序数据中心：新增待处理样本 ${pad(S.seat)}。`);
+    setMq(ev ? '知序数据中心：交付已暂停。' : `知序数据中心：新增待处理样本 ${pad(S.seat)}。`);
   }, 3500);
   $('reset').onclick = e => { e.preventDefault(); resetAll(); };
 };
